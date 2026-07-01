@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lecture3_images/assetImages.dart';
 import 'package:lecture3_images/images.dart';
 
 void main() {
@@ -18,7 +19,8 @@ class MyApp extends StatelessWidget {
 
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: Images(),
+      // home: Images(),
+      home: AssetImages(),
     );
   }
 }
