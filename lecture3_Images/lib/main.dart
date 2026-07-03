@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lecture3_images/assetImages.dart';
 import 'package:lecture3_images/images.dart';
+import 'package:lecture3_images/networkImages.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,7 +21,8 @@ class MyApp extends StatelessWidget {
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
       // home: Images(),
-      home: AssetImages(),
+      // home: AssetImages(),
+      home: NetworkImages(),
     );
   }
 }
