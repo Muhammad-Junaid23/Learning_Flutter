@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lecture4_textfields/loginUI.dart';
+import 'package:lecture4_textfields/registerUI.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +18,8 @@ class MyApp extends StatelessWidget {
 
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: LoginUI(),
+      // home: LoginUI(),
+      home: RegisterUI(),
     );
   }
 }
