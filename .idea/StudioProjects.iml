@@ -12,6 +12,12 @@
       <excludeFolder url="file://$MODULE_DIR$/lecture3_Images/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/lecture3_Images/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/lecture3_Images/build" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture4_TextFields/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture4_TextFields/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture4_TextFields/build" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture5_pageview/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture5_pageview/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture5_pageview/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
