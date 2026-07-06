@@ -62,7 +62,6 @@ class _LoginUIState extends State<LoginUI> {
               labelText: "Password",
               hintText: "ablated3456",
               prefixIcon: Icon(Icons.lock),
-              // suffix: Icon(isPasswordVisible ? Icons.visibility : Icons.visibility_off),
               suffix: IconButton(
                   icon: Icon(
                     !isPasswordVisible ? Icons.visibility : Icons.visibility_off,
@@ -78,11 +77,7 @@ class _LoginUIState extends State<LoginUI> {
                 borderSide: BorderSide.none,
               ),
             ),
-            // onTap: (){
-            //   setState(() {
-            //     isPasswordVisible = !isPasswordVisible;
-            //   });
-            // },
+
           ),
         SizedBox(
           height: 56,
