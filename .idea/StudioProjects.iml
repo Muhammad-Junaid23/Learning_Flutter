@@ -18,6 +18,9 @@
       <excludeFolder url="file://$MODULE_DIR$/lecture5_pageview/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/lecture5_pageview/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/lecture5_pageview/build" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture9_datetimepicker/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture9_datetimepicker/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture9_datetimepicker/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
