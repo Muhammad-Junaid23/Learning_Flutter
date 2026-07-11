@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lecture11_bottombar/bottombar.dart';
+import 'package:lecture11_bottombar/bottombartask.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +17,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: BottomBarScreen(),
+      // home: BottomBarScreen(),
+      home: BottomBarTask(),
     );
   }
 }
