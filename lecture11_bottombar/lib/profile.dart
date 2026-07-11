@@ -6,6 +6,17 @@ class Profile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Profile", style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),),
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(onPressed: (){}, icon: Icon(Icons.notifications_none_outlined)),
+          IconButton(onPressed: (){}, icon: Icon(Icons.more_vert))
+        ],
+      ),
       body: Center(
         child: SingleChildScrollView(
           child: Column(
