@@ -30,6 +30,9 @@
       <excludeFolder url="file://$MODULE_DIR$/lecture12_parameters_provider/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/lecture12_parameters_provider/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/lecture12_parameters_provider/build" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture13_listview/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture13_listview/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture13_listview/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
