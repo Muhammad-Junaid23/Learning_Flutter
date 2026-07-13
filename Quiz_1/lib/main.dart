@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quiz_1/accountscreen.dart';
+import 'package:quiz_1/searchscreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +17,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: Accountscreen(),
+      // home: Accountscreen(),
+      home: SearchScreen(),
     );
   }
 }
