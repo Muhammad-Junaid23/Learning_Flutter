@@ -161,7 +161,7 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
               const SizedBox(height: 25),
 
-              // --- HOTEL LIST ---
+              // --- HOTEL LIST ---h
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
