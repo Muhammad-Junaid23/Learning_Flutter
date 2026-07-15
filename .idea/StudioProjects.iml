@@ -39,6 +39,9 @@
       <excludeFolder url="file://$MODULE_DIR$/lecture14_selections/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/lecture14_selections/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/lecture14_selections/build" />
+      <excludeFolder url="file://$MODULE_DIR$/figmaui/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/figmaui/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/figmaui/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
