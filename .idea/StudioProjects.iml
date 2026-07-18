@@ -48,6 +48,9 @@
       <excludeFolder url="file://$MODULE_DIR$/lecture_settings/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/lecture_settings/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/lecture_settings/build" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture_gridview/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture_gridview/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture_gridview/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
