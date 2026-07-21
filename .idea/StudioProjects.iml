@@ -51,6 +51,12 @@
       <excludeFolder url="file://$MODULE_DIR$/lecture_gridview/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/lecture_gridview/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/lecture_gridview/build" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture_popupmenu_dropdown/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture_popupmenu_dropdown/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture_popupmenu_dropdown/build" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture_theme/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture_theme/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture_theme/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
