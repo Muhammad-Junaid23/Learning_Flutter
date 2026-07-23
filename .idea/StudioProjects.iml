@@ -63,6 +63,9 @@
       <excludeFolder url="file://$MODULE_DIR$/lecture_backend_models/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/lecture_backend_models/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/lecture_backend_models/build" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture_backend_services/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture_backend_services/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/lecture_backend_services/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
