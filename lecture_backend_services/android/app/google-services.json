@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "327135823015",
+    "project_id": "lecture-backend-87e3b",
+    "storage_bucket": "lecture-backend-87e3b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:327135823015:android:47671b50a5cc93dbae4782",
+        "android_client_info": {
+          "package_name": "com.example.lecture_backend_services"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQ6WMIt1i6UdhV7or46OqyLsSQA4EJm7Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
