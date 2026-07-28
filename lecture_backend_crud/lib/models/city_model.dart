@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-CityModel cityModelFromJson(String str) => CityModel.fromJson(json.decode(str));
-
-String cityModelToJson(CityModel data) => json.encode(data.toJson());
+// CityModel cityModelFromJson(String str) => CityModel.fromJson(json.decode(str));
+//
+// String cityModelToJson(CityModel data) => json.encode(data.toJson());
 
 class CityModel {
   final String? docId;
@@ -27,8 +27,8 @@ class CityModel {
     createdAt: json["createdAt"],
   );
 
-  Map<String, dynamic> toJson() => {
-    "docId": docId,
+  Map<String, dynamic> toJson(String cityID) => {
+    "docId": cityID,
     "cityName": cityName,
     "population": population,
     "visited": visited,
