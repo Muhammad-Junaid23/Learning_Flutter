@@ -6,9 +6,14 @@ class CityService{
 
   ///Create City
   Future createCity(CityModel model)async{
+        DocumentReference docRef =
+       await FirebaseFirestore.instance
+        .collection(cityCollection)
+        .doc();
     return await FirebaseFirestore.instance
         .collection(cityCollection)
-        .add(model.toJson());
+        .doc(docRef.id)
+        .set(model.toJson(docRef.id));
   }
   ///Update City
   Future updateCity(CityModel model)async{
@@ -19,18 +24,18 @@ class CityService{
       "population" : model.population,});
   }
   ///Delete City
-  Future deleteCity(CityModel model)async{
+  Future deleteCity(String cityID)async{
     return await FirebaseFirestore.instance
         .collection(cityCollection)
-        .doc(model.docId)
+        .doc(cityID)
         .delete();
   }
   ///Mark As Visited Cities
-  Future markAsVisitedCities(CityModel model)async{
+  Future markAsVisitedCities(String cityID, bool visited)async{
     return await FirebaseFirestore.instance
         .collection(cityCollection)
-        .doc(model.docId)
-        .update({"visited" : model.visited});
+        .doc(cityID)
+        .update({"visited" : visited});
   }
   ///Get All Cities
   Stream<List<CityModel>> getAllCities(){
