@@ -66,4 +66,40 @@ class CityService{
         .map((cityJson) => CityModel.fromJson(cityJson.data())
     ).toList());
   }
+
+    ///get All Saved Cities
+    Stream<List<CityModel>> getAllSaved(String userID){
+      return FirebaseFirestore.instance
+          .collection(cityCollection)
+          .where("saved" , arrayContains: userID)
+          .snapshots()
+          .map((cityList) => cityList.docs
+          .map((cityJson) => CityModel.fromJson(cityJson.data())
+      ).toList());
+    }
+
+        ///add to Saved
+        Future addToSaved({
+          required String userID,
+          required String cityID,
+        })
+        async{
+          return await FirebaseFirestore.instance
+              .collection(cityCollection)
+              .doc(cityID)
+              .update({"saved" : FieldValue.arrayUnion([userID])});
+        }
+
+        ///remove from Saved
+        Future removeFromSaved({
+          required String userID,
+          required String cityID,
+        })
+        async{
+          return await FirebaseFirestore.instance
+              .collection(cityCollection)
+              .doc(cityID)
+              .update({"saved" : FieldValue.arrayRemove([userID])});
+        }
+
 }

@@ -9,6 +9,7 @@ class CityModel {
   final String? cityName;
   final int? population;
   final bool? visited;
+  final List<dynamic>? saved;
   final int? createdAt;
 
   CityModel({
@@ -16,6 +17,7 @@ class CityModel {
     this.cityName,
     this.population,
     this.visited,
+    this.saved,
     this.createdAt,
   });
 
@@ -24,6 +26,7 @@ class CityModel {
     cityName: json["cityName"],
     population: json["population"],
     visited: json["visited"],
+    saved: json["saved"] == null ? [] : List<dynamic>.from(json["saved"]!.map((x) => x)),
     createdAt: json["createdAt"],
   );
 
@@ -32,6 +35,7 @@ class CityModel {
     "cityName": cityName,
     "population": population,
     "visited": visited,
+    "saved": saved == null ? [] : List<dynamic>.from(saved!.map((x) => x)),
     "createdAt": createdAt,
   };
 }
