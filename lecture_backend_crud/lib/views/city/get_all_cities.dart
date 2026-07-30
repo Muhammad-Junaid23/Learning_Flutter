@@ -6,6 +6,7 @@ import 'package:lecture_backend_crud/views/city/get_all_remaining_cities.dart';
 import 'package:lecture_backend_crud/views/city/get_all_saved_cities.dart';
 import 'package:lecture_backend_crud/views/city/get_all_visited_cities.dart';
 import 'package:lecture_backend_crud/views/city/update_city.dart';
+import 'package:lecture_backend_crud/views/country/get_all_countries.dart';
 import 'package:provider/provider.dart';
 
 
@@ -29,6 +30,9 @@ class GetAllCities extends StatelessWidget {
           IconButton(onPressed: (){
             Navigator.push(context, MaterialPageRoute(builder: (context)=> GetAllSavedCities()));
           }, icon: Icon(Icons.bookmark_sharp)),
+          IconButton(onPressed: (){
+            Navigator.push(context, MaterialPageRoute(builder: (context)=> GetAllCountries()));
+          }, icon: Icon(Icons.location_city)),
         ],
       ),
       floatingActionButton: FloatingActionButton(
