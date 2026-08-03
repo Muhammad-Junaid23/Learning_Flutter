@@ -8,7 +8,7 @@ class CountryService {
   //create country
   Future createCountry(CountryModel model)async{
     DocumentReference docRef =
-     FirebaseFirestore
+    await FirebaseFirestore
         .instance
         .collection(countryCollection)
         .doc();
