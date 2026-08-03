@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lecture_backend_crud/models/country_model.dart';
 import 'package:lecture_backend_crud/services/country_service.dart';
 import 'package:lecture_backend_crud/views/country/create_update_country.dart';
+import 'package:lecture_backend_crud/views/country/get_country.dart';
 // import 'package:lecture_backend_crud/views/country/create_update_country.dart';
 import 'package:provider/provider.dart';
 
@@ -46,6 +47,9 @@ class GetAllCountries extends StatelessWidget {
                     IconButton(onPressed: (){
                       Navigator.push(context, MaterialPageRoute(builder: (context)=> CreateUpdateCountry(isUpdateMode: true, model: countryList[index],)));
                     }, icon: Icon(Icons.edit,color: Colors.blue,)),
+                    IconButton(onPressed: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=> GetCountry(model: countryList[index])));
+                    }, icon: Icon(Icons.arrow_forward,color: Colors.green,)),
                   ],
                 ),
               );

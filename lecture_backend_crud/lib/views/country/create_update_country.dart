@@ -82,6 +82,7 @@ class _CreateUpdateCountryState extends State<CreateUpdateCountry> {
                       actions: [
                         TextButton(onPressed: (){
                           Navigator.pop(context);
+                          Navigator.pop(context);
                         }, child: Text("OK"))
                       ],
                     );
