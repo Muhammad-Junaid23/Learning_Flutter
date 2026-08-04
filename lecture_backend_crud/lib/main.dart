@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:lecture_backend_crud/views/city/get_all_cities.dart';
+import 'package:lecture_backend_crud/views/auth/login.dart';
 
 import 'firebase_options.dart';
 
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         ),
-        home: GetAllCities()
+        home: LoginScreen()
     );
   }
 }
