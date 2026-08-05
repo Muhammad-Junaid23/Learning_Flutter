@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lecture_backend_crud/provider/user_provider.dart';
 import 'package:lecture_backend_crud/services/city_service.dart';
 import 'package:lecture_backend_crud/views/city/create_cities.dart';
 import 'package:lecture_backend_crud/models/city_model.dart';
@@ -15,6 +16,7 @@ class GetAllCities extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var userProvider = Provider.of<UserProvider>(context);
     return Scaffold(
       appBar:AppBar(
         title: Text("Get All Cities"),
@@ -269,18 +271,18 @@ class GetAllCities extends StatelessWidget {
                               Expanded(
                                 child: IconButton(
                                   onPressed: ()async{
-                                  if(cityList[index].saved!.contains("101")){
+                                  if(cityList[index].saved!.contains(userProvider.getUser().docId.toString())){
                                   await CityService().removeFromSaved(
-                                  userID: "101",
+                                  userID: userProvider.getUser().docId.toString(),
                                   cityID: cityList[index].docId.toString());
                                   }
                                   else{
                                   await CityService().addToSaved(
-                                  userID: "101",
+                                  userID: userProvider.getUser().docId.toString(),
                                   cityID: cityList[index].docId.toString());
                                   }
                                   },
-                                  icon:  Icon(cityList[index].saved!.contains("101") ? Icons.bookmark_sharp : Icons.bookmark_outline_sharp),
+                                  icon:  Icon(cityList[index].saved!.contains(userProvider.getUser().docId.toString()) ? Icons.bookmark_sharp : Icons.bookmark_outline_sharp),
                                   // label: const Text("Save"),
                                 ),
                               ),
