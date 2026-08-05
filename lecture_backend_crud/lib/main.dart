@@ -1,6 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:lecture_backend_crud/provider/user_provider.dart';
 import 'package:lecture_backend_crud/views/auth/login.dart';
+import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
 
@@ -9,7 +11,10 @@ void main()async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+      runApp(MultiProvider(providers: [
+        ChangeNotifierProvider(create: (context) => UserProvider())
+      ],
+          child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lecture_backend_crud/models/city_model.dart';
+import 'package:lecture_backend_crud/provider/user_provider.dart';
 import 'package:lecture_backend_crud/services/city_service.dart';
 import 'package:lecture_backend_crud/views/city/create_cities.dart';
 import 'package:lecture_backend_crud/views/city/get_all_remaining_cities.dart';
@@ -12,6 +13,7 @@ class GetAllSavedCities extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var userProvider = Provider.of<UserProvider>(context);
     return Scaffold(
       appBar:AppBar(
         title: Text("All Saved Cities"),
@@ -27,7 +29,7 @@ class GetAllSavedCities extends StatelessWidget {
         // ],
       ),
       body: StreamProvider.value(
-        value: CityService().getAllSaved("101"),
+        value: CityService().getAllSaved(userProvider.getUser().docId.toString()),
         initialData: [CityModel()],
         builder: (context, child){
           List<CityModel> cityList = context.watch<List<CityModel>>();
@@ -42,17 +44,17 @@ class GetAllSavedCities extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(onPressed: ()async{
-                      if(cityList[index].saved!.contains("101")){
+                      if(cityList[index].saved!.contains(userProvider.getUser().docId.toString())){
                         await CityService().removeFromSaved(
-                            userID: "101",
+                            userID: userProvider.getUser().docId.toString(),
                             cityID: cityList[index].docId.toString());
                       }
                       else{
                         await CityService().addToSaved(
-                            userID: "101",
+                            userID: userProvider.getUser().docId.toString(),
                             cityID: cityList[index].docId.toString());
                       }
-                    }, icon: Icon(Icons.bookmark_sharp)),
+                    }, icon: Icon(cityList[index].saved!.contains(userProvider.getUser().docId.toString()) ? Icons.bookmark_sharp : Icons.bookmark_outline_sharp)),
                     Checkbox(
                         value: cityList[index].visited,
                         onChanged: (val)async{

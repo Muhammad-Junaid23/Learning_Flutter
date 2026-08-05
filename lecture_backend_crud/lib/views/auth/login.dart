@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:lecture_backend_crud/models/user_model.dart';
+import 'package:lecture_backend_crud/provider/user_provider.dart';
 import 'package:lecture_backend_crud/services/auth_service.dart';
+import 'package:lecture_backend_crud/services/user_service.dart';
 import 'package:lecture_backend_crud/views/auth/register.dart';
 import 'package:lecture_backend_crud/views/auth/reset_password.dart';
 import 'package:lecture_backend_crud/views/city/get_all_cities.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var userProvider = Provider.of<UserProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text("Login Screen"),
@@ -60,25 +65,28 @@ class _LoginScreenState extends State<LoginScreen> {
                 :
                 ElevatedButton(onPressed: ()async{
                   try{
-                    isLoading = true;
+                    setState(() {
+                      isLoading = true;
+                    });
                     await AuthService().loginUser(email: emailController.text, password: passwordController.text)
-                    .then((value){
-                      if(value.emailVerified == true){
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>GetAllCities()));
-                      }else{
-                        isLoading = false;
+                    .then((value)async{
+                      UserModel userModel=
+                      await UserService().getUserByID(value.uid.toString());
+                      userProvider.setUser(userModel);
+                       setState(() {
+                         isLoading = false;
+                       });
                         showDialog(context: context, builder: (BuildContext context){
                           return AlertDialog(
-                            title: Text("Warning"),
-                            content: Text("Verify your email"),
+                            title: Text("Success"),
+                            content: Text("Login success"),
                             actions: [
                               TextButton(onPressed: (){
-                                Navigator.pop(context);
+                                Navigator.push(context, MaterialPageRoute(builder: (context)=> GetAllCities()));
                               }, child: Text("OK"))
                             ],
                           );
                         });
-                      }
                     });
                   }catch(e){
                     ScaffoldMessenger.of(context)

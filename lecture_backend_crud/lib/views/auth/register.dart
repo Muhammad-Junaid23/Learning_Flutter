@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:lecture_backend_crud/models/user_model.dart';
 import 'package:lecture_backend_crud/services/auth_service.dart';
 
+import 'package:lecture_backend_crud/services/user_service.dart';
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -11,6 +13,9 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  TextEditingController nameController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+  TextEditingController addressController = TextEditingController();
   bool isLoading = false;
 
   @override
@@ -26,38 +31,81 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: Column(
           children: [
             TextField(
-              controller: emailController,
+              controller:  nameController,
               decoration: InputDecoration(
-                  hintText: "Email",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  )
+                hintText: "Name",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            SizedBox(height: 10,),
+            TextField(
+              controller:  emailController,
+              decoration: InputDecoration(
+                hintText: "Email",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
             SizedBox(height: 10,),
             TextField(
               controller: passwordController,
               decoration: InputDecoration(
-                  hintText: "Password",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  )
+                hintText: "Password",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
-
+            SizedBox(height: 10,),
+            TextField(
+              controller: phoneController,
+              decoration: InputDecoration(
+                hintText: "Contact",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            SizedBox(height: 10,),
+            TextField(
+              controller: addressController,
+              decoration: InputDecoration(
+                hintText: "Address",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
             SizedBox(height: 10,),
             isLoading ? Center(child: CircularProgressIndicator(),)
-                :
-            ElevatedButton(onPressed: ()async{
+                :ElevatedButton(onPressed: ()async{
               try{
-                isLoading = true;
-                await AuthService().registerUser(email: emailController.text, password: passwordController.text)
-                    .then((value){
+                setState(() {
+                  isLoading = true;
+                });
+                await AuthService().registerUser(
+                    email: emailController.text,
+                    password: passwordController.text)
+                    .then((value)async{
+                  await UserService().createUser(
+                      UserModel(
+                          docId: value.uid,
+                          name: nameController.text,
+                          email: emailController.text,
+                          phone: phoneController.text,
+                          address: addressController.text,
+                          createdAt: DateTime.now().millisecondsSinceEpoch
+                      )
+                  ).then((val){
                     isLoading = false;
-                    showDialog(context: context, builder: (BuildContext context){
+                    setState(() {});
+                    showDialog(context: context, builder: (BuildContext context) {
                       return AlertDialog(
                         title: Text("Success"),
-                        content: Text("User Registered Successfully"),
+                        content: Text("Registration Successful"),
                         actions: [
                           TextButton(onPressed: (){
                             Navigator.pop(context);
@@ -65,15 +113,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           }, child: Text("OK"))
                         ],
                       );
-                    });
-                  }
-                );
+                    }, );
+
+                  });
+                });
               }catch(e){
                 isLoading = false;
+                setState(() {});
                 ScaffoldMessenger.of(context)
                     .showSnackBar(SnackBar(content: Text(e.toString())));
               }
-            }, child: Text("Register")),
+            }, child: Text("Register"))
           ],
         ),
       ),
