@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:task_category_product/views/product/all_products.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:task_category_product/firebase_options.dart';
+import 'package:task_category_product/views/home.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const MyApp());
 }
 
@@ -16,7 +24,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: AllProducts(),
+      home: HomeScreen(),
     );
   }
 }
