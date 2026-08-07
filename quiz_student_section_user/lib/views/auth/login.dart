@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:quiz_student_section_user/models/user_model.dart';
+import 'package:quiz_student_section_user/provider/user_provider.dart';
 import 'package:quiz_student_section_user/services/auth_service.dart';
+import 'package:quiz_student_section_user/services/user_service.dart';
 import 'package:quiz_student_section_user/views/auth/register.dart';
 import 'package:quiz_student_section_user/views/auth/reset_password.dart';
 import 'package:quiz_student_section_user/views/student/get_all_students.dart';
@@ -21,6 +24,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var userProvider = Provider.of<UserProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Login"),
@@ -67,9 +72,26 @@ class _LoginScreenState extends State<LoginScreen> {
                     isLoading = true;
                   });
                   await AuthService().loginUser(email: emailController.text, password: passwordController.text)
-                  .then((value){
+                      .then((value) async {
+                    UserModel userModel=
+                    await UserService().getUserByID(value.uid.toString());
+                    userProvider.setUser(userModel);
+
                     if(value.emailVerified == true){
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>GetAllStudents()));
+                      setState(() {
+                        isLoading = false;
+                      });
+                      showDialog(context: context, builder: (BuildContext context){
+                        return AlertDialog(
+                          title: Text("Success"),
+                          content: Text("Login success"),
+                          actions: [
+                            TextButton(onPressed: (){
+                              Navigator.push(context, MaterialPageRoute(builder: (context)=>GetAllStudents()));
+                            }, child: Text("OK"))
+                          ],
+                        );
+                      });
                     }else{
                       setState(() {
                         isLoading = false;
