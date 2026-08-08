@@ -5,7 +5,7 @@ class AuthService {
   Future<User> registerUser({
     required String email,
     required String password,
-})async{
+    })async{
     try{
       UserCredential userCredential=
           await FirebaseAuth.instance
@@ -33,7 +33,7 @@ class AuthService {
   }
 
   Future resetPassword({
-    required String email
+    required String email,
 })async{
     await FirebaseAuth.instance
         .sendPasswordResetEmail(email: email);

@@ -72,42 +72,25 @@ class _LoginScreenState extends State<LoginScreen> {
                     isLoading = true;
                   });
                   await AuthService().loginUser(email: emailController.text, password: passwordController.text)
-                      .then((value) async {
+                  .then((value) async {
                     UserModel userModel=
                     await UserService().getUserByID(value.uid.toString());
                     userProvider.setUser(userModel);
 
-                    if(value.emailVerified == true){
-                      setState(() {
-                        isLoading = false;
-                      });
-                      showDialog(context: context, builder: (BuildContext context){
-                        return AlertDialog(
-                          title: Text("Success"),
-                          content: Text("Login success"),
-                          actions: [
-                            TextButton(onPressed: (){
-                              Navigator.push(context, MaterialPageRoute(builder: (context)=>GetAllStudents()));
-                            }, child: Text("OK"))
-                          ],
-                        );
-                      });
-                    }else{
-                      setState(() {
-                        isLoading = false;
-                      });
-                      showDialog(context: context, builder: (BuildContext context){
-                        return AlertDialog(
-                          title: Text("Warning"),
-                          content: Text("Verify your email"),
-                          actions: [
-                            TextButton(onPressed: (){
-                              Navigator.pop(context);
-                            }, child: Text("OK"))
-                          ],
-                        );
-                      });
-                    }
+                    setState(() {
+                      isLoading = false;
+                    });
+                    showDialog(context: context, builder: (BuildContext context){
+                      return AlertDialog(
+                        title: Text("Success"),
+                        content: Text("Login success"),
+                        actions: [
+                          TextButton(onPressed: (){
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=> GetAllStudents()));
+                          }, child: Text("OK"))
+                        ],
+                      );
+                    });
                   });
                 }catch(e){
                   ScaffoldMessenger.of(context)

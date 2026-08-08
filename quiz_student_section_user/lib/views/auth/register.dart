@@ -80,7 +80,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   await AuthService().registerUser(
                       email: emailController.text,
                       password: passwordController.text)
-                        .then((value)async {
+                      .then((value)async {
                     await UserService().createUser(
                         UserModel(
                             docId: value.uid,
@@ -92,8 +92,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 .now()
                                 .millisecondsSinceEpoch
                         )
-                    )
-                        .then((val) {
+                    ).then((val) {
                       setState(() {
                         isLoading = false;
                       });
@@ -113,8 +112,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     });
                   });
                 }catch(e){
-                  isLoading = false;
-                  setState(() {});
+                  setState(() {
+                    isLoading = false;
+                  });
                   ScaffoldMessenger.of(context)
                       .showSnackBar(SnackBar(content: Text(e.toString())));
                 }

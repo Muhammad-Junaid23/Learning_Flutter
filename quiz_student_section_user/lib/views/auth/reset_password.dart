@@ -34,13 +34,12 @@ class _ResetPasswordState extends State<ResetPassword> {
         isLoading ? Center(child: CircularProgressIndicator(),)
             :ElevatedButton(onPressed: ()async{
           try{
-
             setState(() {
               isLoading = true;
             });
             await AuthService().resetPassword(
               email: emailController.text,)
-                .then((value){
+              .then((value){
               setState(() {
                 isLoading = false;
               });
