@@ -6,6 +6,8 @@ import 'package:quiz_student_section_user/services/auth_service.dart';
 import 'package:quiz_student_section_user/services/user_service.dart';
 import 'package:quiz_student_section_user/views/auth/register.dart';
 import 'package:quiz_student_section_user/views/auth/reset_password.dart';
+import 'package:quiz_student_section_user/views/profile/get_profile.dart';
+import 'package:quiz_student_section_user/views/section/get_all_sections.dart';
 import 'package:quiz_student_section_user/views/student/get_all_students.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -87,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           content: Text("Login success"),
                           actions: [
                             TextButton(onPressed: (){
-                              Navigator.push(context, MaterialPageRoute(builder: (context)=> GetAllStudents()));
+                              Navigator.push(context, MaterialPageRoute(builder: (context)=> GetAllSections()));
                             }, child: Text("OK"))
                           ],
                         );
