@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-StudentModel studentModelFromJson(String str) => StudentModel.fromJson(json.decode(str));
-
-String studentModelToJson(StudentModel data) => json.encode(data.toJson());
+// StudentModel studentModelFromJson(String str) => StudentModel.fromJson(json.decode(str));
+//
+// String studentModelToJson(StudentModel data) => json.encode(data.toJson());
 
 class StudentModel {
   final String? docId;
@@ -27,7 +27,7 @@ class StudentModel {
 
   factory StudentModel.fromJson(Map<String, dynamic> json) => StudentModel(
     docId: json["docId"],
-    sectionId: json["sectionID"],
+    sectionId: json["sectionId"],
     studentName: json["studentName"],
     studentAge: json["studentAge"],
     studentCity: json["studentCity"],
@@ -36,9 +36,9 @@ class StudentModel {
     createdAt: json["createdAt"],
   );
 
-  Map<String, dynamic> toJson() => {
-    "docId": docId,
-    "sectionID": sectionId,
+  Map<String, dynamic> toJson(String studentId) => {
+    "docId": studentId,
+    "sectionId": sectionId,
     "studentName": studentName,
     "studentAge": studentAge,
     "studentCity": studentCity,

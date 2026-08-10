@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-SectionModel sectionModelFromJson(String str) => SectionModel.fromJson(json.decode(str));
-
-String sectionModelToJson(SectionModel data) => json.encode(data.toJson());
+// SectionModel sectionModelFromJson(String str) => SectionModel.fromJson(json.decode(str));
+//
+// String sectionModelToJson(SectionModel data) => json.encode(data.toJson());
 
 class SectionModel {
   final String? docId;
@@ -21,8 +21,8 @@ class SectionModel {
     createdAt: json["createdAt"],
   );
 
-  Map<String, dynamic> toJson() => {
-    "docId": docId,
+  Map<String, dynamic> toJson(String sectionId) => {
+    "docId": sectionId,
     "sectionName": sectionName,
     "createdAt": createdAt,
   };
