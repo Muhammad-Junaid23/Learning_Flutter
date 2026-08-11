@@ -10,251 +10,237 @@ import 'package:quiz_student_section_user/views/student/get_all_intelligent_stud
 import 'package:quiz_student_section_user/views/student/get_all_passed_students.dart';
 import 'package:quiz_student_section_user/views/student/update_student.dart';
 
-
 class GetAllStudents extends StatelessWidget {
   const GetAllStudents({super.key});
 
   @override
   Widget build(BuildContext context) {
-    var userProvider = Provider.of<UserProvider>(context);
+    final userProvider = Provider.of<UserProvider>(context);
+    final userId = userProvider.getUser().docId.toString();
+
     return Scaffold(
-      appBar:AppBar(
-        title: Text("Get All Students"),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text("Students"),
+        centerTitle: false,
+        titleTextStyle: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).colorScheme.onSurface,
+        ),
         actions: [
-          IconButton(onPressed: (){
-            Navigator.push(context, MaterialPageRoute(builder: (context)=> GetAllPassedStudents()));
-          }, icon: Icon(Icons.circle)),
-          IconButton(onPressed: (){
-            Navigator.push(context, MaterialPageRoute(builder: (context)=> GetAllFailedStudents()));
-          }, icon: Icon(Icons.incomplete_circle)),
-          IconButton(onPressed: (){
-            Navigator.push(context, MaterialPageRoute(builder: (context)=> GetAllIntelligentStudents()));
-          }, icon: Icon(Icons.bookmark_sharp)),
-          IconButton(onPressed: (){
-            Navigator.push(context, MaterialPageRoute(builder: (context)=> GetAllSections()));
-          }, icon: Icon(Icons.location_city)),
+          IconButton(
+            tooltip: "Passed Students",
+            icon: const Icon(Icons.check_circle_outline),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const GetAllPassedStudents()),
+              );
+            },
+          ),
+          IconButton(
+            tooltip: "Failed Students",
+            icon: const Icon(Icons.highlight_off_rounded),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const GetAllFailedStudents()),
+              );
+            },
+          ),
+          IconButton(
+            tooltip: "Intelligent Students",
+            icon: const Icon(Icons.star_outline_rounded),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const GetAllIntelligentStudents()),
+              );
+            },
+          ),
+          IconButton(
+            tooltip: "Sections",
+            icon: const Icon(Icons.domain_outlined),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const GetAllSections()),
+              );
+            },
+          ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-        onPressed: (){
-          Navigator.push(context, MaterialPageRoute(builder: (context)=> CreateStudent()));
-        },child: Icon(Icons.add),),
-      body: StreamProvider.value(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CreateStudent()),
+          );
+        },
+        icon: const Icon(Icons.person_add_outlined),
+        label: const Text("Add Student"),
+      ),
+      body: StreamProvider<List<StudentModel>>.value(
         value: StudentService().getAllStudents(),
-        initialData: [StudentModel()],
-        builder: (context, child){
+        initialData: const [],
+        builder: (context, child) {
           List<StudentModel> studentList = context.watch<List<StudentModel>>();
-          return GridView.builder(
-              padding: const EdgeInsets.all(10),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 0.8,
-              ),
-              itemCount: studentList.length,
-              itemBuilder: (BuildContext context, int index){
-                return Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
 
-                        // ---------------- population ----------------
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 5),
+          if (studentList.isEmpty) {
+            return const Center(
+              child: Text(
+                "No students added yet.\nTap '+' to add a new student.",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey, fontSize: 16),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            itemCount: studentList.length,
+            itemBuilder: (context, index) {
+              final student = studentList[index];
+              final isBookmarked = student.intelligent?.contains(userId) ?? false;
+              final isPassed = student.isPassed ?? false;
+
+              return Card(
+                elevation: 1.5,
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: Padding(
+                  padding: const EdgeInsets.all(14.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 24,
+                            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                            child: Icon(Icons.person, color: Theme.of(context).primaryColor),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  student.studentName ?? "Unnamed",
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  "City: ${student.studentCity ?? 'N/A'} • Age: ${student.studentAge ?? 'N/A'}",
+                                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.blue.shade100,
-                              borderRadius: BorderRadius.circular(20),
+                              color: isPassed ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              studentList[index].studentAge.toString(),
-                              style: const TextStyle(
+                              isPassed ? "Passed" : "Pending",
+                              style: TextStyle(
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold,
+                                color: isPassed ? Colors.green[800] : Colors.orange[800],
                               ),
                             ),
                           ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        // ---------------- City Icon ----------------
-                        Icon(Icons.location_city,color: Colors.blue,size: 38,),
-
-                        const SizedBox(height: 10),
-
-
-                        // ---------------- City name ----------------
-
-                        Text(studentList[index].studentName.toString(),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                          // textAlign: TextAlign.center,
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        // ---------------- student City ----------------
-
-                        Text(studentList[index].studentCity.toString(),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                          // textAlign: TextAlign.center,
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        // ------------------- visited -----------
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Checkbox(value: studentList[index].isPassed,
-                              onChanged: (val)async{
-                                try{
-                                  await StudentService().markAsPassedStudent(
-                                    studentList[index].docId.toString(),
-                                    val!,
-                                  );
-                                }catch (e){
-                                  if (!context.mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(e.toString())),
-                                  );
-                                }
-                              },
-                            ),
-                            const Text("Passed"),
-                          ],
-                        ),
-
-                        const Spacer(),
-
-                        const Divider(
-                          thickness: 1,
-                        ),
-
-                        // -------------- Actions -----------
-                        Row(
-                          // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Expanded(
-                              child: IconButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => UpdateStudent(
-                                        model: studentList[index],
-                                      ),
-                                    ),
-                                  );
-                                },
-                                icon: const Icon(
-                                  Icons.edit,
-                                  color: Colors.blue,
-                                ),
-                                // label: const Text("Edit"),
-                              ),
-                            ),
-
-                            Container(
-                              width: 1,
-                              height: 30,
-                              color: Colors.grey.shade300,
-                            ),
-
-                            Expanded(
-                              child: IconButton(
-                                onPressed: () async {
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      const Divider(height: 1),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Checkbox(
+                                value: isPassed,
+                                activeColor: Colors.green,
+                                onChanged: (val) async {
                                   try {
-                                    await StudentService().deleteStudent(
-                                      studentList[index].docId.toString(),
-                                    );
-
-                                    if (!context.mounted) return;
-
-                                    showDialog(
-                                      context: context,
-                                      builder: (_) => AlertDialog(
-                                        title: const Text("Success"),
-                                        content: const Text("student Deleted Successfully"),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: const Text("OK"),
-                                          ),
-                                        ],
-                                      ),
+                                    await StudentService().markAsPassedStudent(
+                                      student.docId.toString(),
+                                      val ?? false,
                                     );
                                   } catch (e) {
                                     if (!context.mounted) return;
-
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(content: Text(e.toString())),
                                     );
                                   }
                                 },
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                ),
-                                // label: const Text("Delete"),
                               ),
-                            ),
-
-                            Container(
-                              width: 1,
-                              height: 30,
-                              color: Colors.grey.shade300,
-                            ),
-
-                            Expanded(
-                              child: IconButton(
-                                onPressed: ()async{
-                                  if(studentList[index].intelligent!.contains(userProvider.getUser().docId.toString())){
+                              const Text("Passed Status", style: TextStyle(fontSize: 13)),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                tooltip: "Mark Intelligent",
+                                icon: Icon(
+                                  isBookmarked ? Icons.star_rounded : Icons.star_outline_rounded,
+                                  color: isBookmarked ? Colors.amber[700] : Colors.grey,
+                                ),
+                                onPressed: () async {
+                                  if (isBookmarked) {
                                     await StudentService().removeFromIntelligentList(
-                                        userID: userProvider.getUser().docId.toString(),
-                                        studentId: studentList[index].docId.toString());
-                                  }
-                                  else{
+                                      userID: userId,
+                                      studentId: student.docId.toString(),
+                                    );
+                                  } else {
                                     await StudentService().addToIntelligentList(
-                                        userID: userProvider.getUser().docId.toString(),
-                                        studentId: studentList[index].docId.toString());
+                                      userID: userId,
+                                      studentId: student.docId.toString(),
+                                    );
                                   }
                                 },
-                                icon:  Icon(studentList[index].intelligent!.contains(userProvider.getUser().docId.toString()) ? Icons.bookmark_sharp : Icons.bookmark_outline_sharp),
-                                // label: const Text("Save"),
                               ),
-                            ),
-
-                          ],
-                        )
-
-                      ],
-                    ),
-
+                              IconButton(
+                                tooltip: "Edit",
+                                icon: const Icon(Icons.edit_outlined, color: Colors.blue),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (_) => UpdateStudent(model: student)),
+                                  );
+                                },
+                              ),
+                              IconButton(
+                                tooltip: "Delete",
+                                icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
+                                onPressed: () async {
+                                  try {
+                                    await StudentService().deleteStudent(student.docId.toString());
+                                    if (!context.mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text("Student deleted successfully")),
+                                    );
+                                  } catch (e) {
+                                    if (!context.mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(e.toString())),
+                                    );
+                                  }
+                                },
+                              ),
+                            ],
+                          )
+                        ],
+                      )
+                    ],
                   ),
-                );
-              }
+                ),
+              );
+            },
           );
-
         },
       ),
     );

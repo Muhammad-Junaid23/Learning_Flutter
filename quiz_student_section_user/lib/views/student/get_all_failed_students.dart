@@ -10,75 +10,67 @@ class GetAllFailedStudents extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:AppBar(
-        title: Text("Get All Failed Students"),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+      appBar: AppBar(title: const Text("Failed / Pending Students")),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CreateStudent()),
+          );
+        },
+        icon: const Icon(Icons.add),
+        label: const Text("Add Student"),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-        onPressed: (){
-          Navigator.push(context, MaterialPageRoute(builder: (context)=> CreateStudent()));
-        },child: Icon(Icons.add),),
-      body: StreamProvider.value(
+      body: StreamProvider<List<StudentModel>>.value(
         value: StudentService().getAllFailedStudents(),
-        initialData: [StudentModel()],
-        builder: (context, child){
+        initialData: const [],
+        builder: (context, child) {
           List<StudentModel> studentList = context.watch<List<StudentModel>>();
-          return ListView.builder(
-            itemCount: studentList.length,
-            itemBuilder: (BuildContext context, int index) {
-              return ListTile(
-                leading: Icon(Icons.task),
-                title: Text(studentList[index].studentName.toString()),
-                subtitle: Text(studentList[index].studentAge.toString()),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Checkbox(
-                        value: studentList[index].isPassed,
-                        onChanged: (val)async{
-                          try{
-                            await StudentService().markAsPassedStudent(
-                                studentList[index].docId.toString(),
-                                val!);
-                          }catch(e){
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(SnackBar(content: Text(e.toString())));
-                          }
 
-                        }),
-                    // IconButton(onPressed: ()async{
-                    //   try{
-                    //     await CityService().deleteCity(
-                    //         cityList[index].docId.toString()
-                    //     ).then((value){
-                    //       showDialog(context: context, builder: (BuildContext context) {
-                    //         return
-                    //           AlertDialog(
-                    //             title: Text("Success"),
-                    //             content: Text("City Deleted Successfully"),
-                    //             actions: [
-                    //               TextButton(onPressed: (){
-                    //                 Navigator.pop(context);
-                    //               }, child: Text("OK"))
-                    //             ],
-                    //           );
-                    //       });
-                    //     });
-                    //   }catch(e){
-                    //     ScaffoldMessenger.of(context)
-                    //         .showSnackBar(SnackBar(content: Text(e.toString())));
-                    //   }
-                    // }, icon: Icon(Icons.delete, color: Colors.red,)),
-                    // IconButton(onPressed: (){
-                    //   Navigator.push(context, MaterialPageRoute(builder: (context)=> UpdateCity(model: cityList[index])));
-                    // }, icon: Icon(Icons.edit, color: Colors.blue,)),
-                  ],
+          if (studentList.isEmpty) {
+            return const Center(
+              child: Text(
+                "No pending/failed students found.",
+                style: TextStyle(color: Colors.grey, fontSize: 16),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: studentList.length,
+            itemBuilder: (context, index) {
+              final student = studentList[index];
+              return Card(
+                elevation: 1,
+                margin: const EdgeInsets.only(bottom: 10),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.orange.withOpacity(0.1),
+                    child: const Icon(Icons.priority_high, color: Colors.orange),
+                  ),
+                  title: Text(student.studentName ?? "Unnamed", style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text("Age: ${student.studentAge ?? 'N/A'} • City: ${student.studentCity ?? 'N/A'}"),
+                  trailing: Checkbox(
+                    value: student.isPassed ?? false,
+                    onChanged: (val) async {
+                      try {
+                        await StudentService().markAsPassedStudent(
+                          student.docId.toString(),
+                          val ?? false,
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(e.toString())),
+                        );
+                      }
+                    },
+                  ),
                 ),
               );
-            },);
+            },
+          );
         },
       ),
     );

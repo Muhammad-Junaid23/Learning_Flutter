@@ -11,126 +11,174 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController nameController = TextEditingController();
-  TextEditingController phoneController = TextEditingController();
-  TextEditingController addressController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
   bool isLoading = false;
+  bool isPasswordObscured = true;
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    phoneController.dispose();
+    addressController.dispose();
+    super.dispose();
+  }
+
+  void _handleRegister() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => isLoading = true);
+
+    try {
+      final value = await AuthService().registerUser(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      await UserService().createUser(
+        UserModel(
+          docId: value.uid,
+          name: nameController.text.trim(),
+          email: emailController.text.trim(),
+          phone: phoneController.text.trim(),
+          address: addressController.text.trim(),
+          createdAt: DateTime.now().millisecondsSinceEpoch,
+        ),
+      );
+
+      if (!mounted) return;
+      setState(() => isLoading = false);
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text("Success"),
+          content: const Text("Account created successfully! Please verify your email."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: const Text("OK"),
+            )
+          ],
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Register user"),
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
+        title: const Text("Create Account"),
+        elevation: 0,
       ),
-        body: Padding(
-          padding: const EdgeInsets.all(10),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Form(
+          key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextField(
-                controller:  nameController,
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: nameController,
+                validator: (val) => val == null || val.isEmpty ? "Enter full name" : null,
                 decoration: InputDecoration(
-                  hintText: "Name",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  labelText: "Full Name",
+                  prefixIcon: const Icon(Icons.person_outline),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
-          SizedBox(height: 10,),
-          TextField(
-            controller:  emailController,
-            decoration: InputDecoration(
-              hintText: "Email",
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                validator: (val) => val == null || val.isEmpty ? "Enter email" : null,
+                decoration: InputDecoration(
+                  labelText: "Email Address",
+                  prefixIcon: const Icon(Icons.email_outlined),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
               ),
-            ),
-          ),
-          SizedBox(height: 10,),
-          TextField(
-            controller: passwordController,
-            decoration: InputDecoration(
-              hintText: "Password",
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: passwordController,
+                obscureText: isPasswordObscured,
+                validator: (val) => val != null && val.length < 6 ? "Password must be at least 6 characters" : null,
+                decoration: InputDecoration(
+                  labelText: "Password",
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      isPasswordObscured ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                    ),
+                    onPressed: () => setState(() => isPasswordObscured = !isPasswordObscured),
+                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
               ),
-            ),
-          ),
-          SizedBox(height: 10,),
-              TextField(
+              const SizedBox(height: 16),
+              TextFormField(
                 controller: phoneController,
+                keyboardType: TextInputType.phone,
+                validator: (val) => val == null || val.isEmpty ? "Enter phone number" : null,
                 decoration: InputDecoration(
-                  hintText: "Contact",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  labelText: "Contact Phone",
+                  prefixIcon: const Icon(Icons.phone_outlined),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
-              SizedBox(height: 10,),
-              TextField(
+              const SizedBox(height: 16),
+              TextFormField(
                 controller: addressController,
+                maxLines: 2,
+                validator: (val) => val == null || val.isEmpty ? "Enter address" : null,
                 decoration: InputDecoration(
-                  hintText: "Address",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  labelText: "Address",
+                  prefixIcon: const Icon(Icons.location_on_outlined),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
-              SizedBox(height: 10,),
-              isLoading ? Center(child: CircularProgressIndicator(),)
-                  :ElevatedButton(onPressed: ()async{
-                try{
-                  setState(() {
-                    isLoading = true;
-                  });
-                  await AuthService().registerUser(
-                      email: emailController.text,
-                      password: passwordController.text)
-                      .then((value)async {
-                    await UserService().createUser(
-                        UserModel(
-                            docId: value.uid,
-                            name: nameController.text,
-                            email: emailController.text,
-                            phone: phoneController.text,
-                            address: addressController.text,
-                            createdAt: DateTime
-                                .now()
-                                .millisecondsSinceEpoch
-                        )
-                    ).then((val) {
-                      setState(() {
-                        isLoading = false;
-                      });
-                      showDialog(
-                        context: context, builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text("Success"),
-                          content: Text("Registration Successful"),
-                          actions: [
-                            TextButton(onPressed: () {
-                              Navigator.pop(context);
-                              Navigator.pop(context);
-                            }, child: Text("OK"))
-                          ],
-                        );
-                      },);
-                    });
-                  });
-                }catch(e){
-                  setState(() {
-                    isLoading = false;
-                  });
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(content: Text(e.toString())));
-                }
-              }, child: Text("Register"))
-          ]
-          )
-        )
+              const SizedBox(height: 28),
+              SizedBox(
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: isLoading ? null : _handleRegister,
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: isLoading
+                      ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                  )
+                      : const Text("Register Account", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

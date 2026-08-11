@@ -12,144 +12,166 @@ class CreateStudent extends StatefulWidget {
 }
 
 class _CreateStudentState extends State<CreateStudent> {
-  TextEditingController nameController = TextEditingController();
-  TextEditingController ageController = TextEditingController();
-  TextEditingController cityController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController ageController = TextEditingController();
+  final TextEditingController cityController = TextEditingController();
   List<SectionModel> sectionList = [];
   SectionModel? selectedSection;
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    SectionService().getSections().then((val){
-      setState((){
-        sectionList = val;
-      });
+    SectionService().getSections().then((val) {
+      if (mounted) {
+        setState(() => sectionList = val);
+      }
     });
   }
 
-  // @override
-  // void dispose() {
-  //   nameController.dispose();
-  //   populationController.dispose();
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    nameController.dispose();
+    ageController.dispose();
+    cityController.dispose();
+    super.dispose();
+  }
+
+  void _handleCreateStudent() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (selectedSection == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please select a section")),
+      );
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    try {
+      await StudentService().createStudent(
+        StudentModel(
+          sectionId: selectedSection!.docId,
+          studentName: nameController.text.trim(),
+          studentCity: cityController.text.trim(),
+          studentAge: int.parse(ageController.text.trim()),
+          isPassed: false,
+          createdAt: DateTime.now().millisecondsSinceEpoch,
+        ),
+      );
+
+      if (!mounted) return;
+      setState(() => isLoading = false);
+
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text("Success"),
+          content: const Text("Student created successfully"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
+
+      if (!mounted) return;
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Create Student"),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-      ),
-      body: Column(
-        children: [
-          TextField(
-            controller: nameController,
-            decoration: InputDecoration(
-                hintText: "Student name",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                )
-            ),
-          ),
-          SizedBox(height: 10,),
-          TextField(
-            controller: cityController,
-            decoration: InputDecoration(
-                hintText: "Student city",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                )
-            ),
-          ),
-          SizedBox(height: 10,),
-          TextField(
-            controller: ageController,
-            decoration: InputDecoration(
-                hintText: "Age",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                )
-            ),
-          ),
-          SizedBox(height: 10,),
-          DropdownButton(
-              hint: Text("Select Section"),
-              value: selectedSection,
-              items: sectionList.map((section){
-                return DropdownMenuItem(
+      appBar: AppBar(title: const Text("Add New Student")),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: nameController,
+                validator: (val) => val == null || val.isEmpty ? "Student name is required" : null,
+                decoration: InputDecoration(
+                  labelText: "Student Name",
+                  prefixIcon: const Icon(Icons.person_outline),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: cityController,
+                validator: (val) => val == null || val.isEmpty ? "City is required" : null,
+                decoration: InputDecoration(
+                  labelText: "City",
+                  prefixIcon: const Icon(Icons.location_city_outlined),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: ageController,
+                keyboardType: TextInputType.number,
+                validator: (val) => val == null || int.tryParse(val) == null ? "Enter a valid age" : null,
+                decoration: InputDecoration(
+                  labelText: "Age",
+                  prefixIcon: const Icon(Icons.numbers_outlined),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<SectionModel>(
+                value: selectedSection,
+                hint: const Text("Select Section"),
+                validator: (val) => val == null ? "Section is required" : null,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.class_outlined),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                items: sectionList.map((section) {
+                  return DropdownMenuItem(
                     value: section,
-                    child: Text(section.sectionName.toString())
-                );
-              }).toList(),
-              onChanged: (val){
-                setState(() {
-                  selectedSection = val;
-                });
-              }),
-          SizedBox(height: 10,),
-          ElevatedButton(onPressed: ()async{
-            try{
-              await StudentService().createStudent(
-                  StudentModel(
-                      sectionId: selectedSection!.docId,
-                      studentName: nameController.text.toString(),
-                      studentCity: cityController.text.toString(),
-                      studentAge: int.parse(ageController.text),
-                      isPassed: false,
-                      createdAt: DateTime.now().millisecondsSinceEpoch
-                  )
-              );
-
-              // showDialog(context: context,
-              //     builder: (BuildContext dialogContext){
-              //   return AlertDialog(
-              //     title: Text("Success"),
-              //     content: Text("City created Successfully"),
-              //     actions: [
-              //       TextButton(onPressed: (){
-              //         Navigator.pop(dialogContext);
-              //         Navigator.pop(context);
-              //       }, child: Text("OK"))
-              //     ],
-              //   );
-              //     },
-              // );
-
-              if (!mounted) return;
-
-              await showDialog(
-                context: this.context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: Text("Success"),
-                    content: Text("Student created Successfully"),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Text("OK"),
-                      ),
-                    ],
+                    child: Text(section.sectionName ?? ""),
                   );
-                },
-              );
-
-              if (!mounted) return;
-
-              Navigator.pop(this.context);
-
-            }
-            catch(e){
-              if (!mounted) return;
-              ScaffoldMessenger.of(this.context)
-                  .showSnackBar(SnackBar(content: Text(e.toString())));
-            }
-          }, child: Text("Create Student"))
-        ],
+                }).toList(),
+                onChanged: (val) => setState(() => selectedSection = val),
+              ),
+              const SizedBox(height: 28),
+              SizedBox(
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: isLoading ? null : _handleCreateStudent,
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: isLoading
+                      ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                  )
+                      : const Text("Create Student", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              )
+            ],
+          ),
+        ),
       ),
     );
   }

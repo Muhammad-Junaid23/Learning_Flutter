@@ -9,85 +9,67 @@ class GetAllIntelligentStudents extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var userProvider = Provider.of<UserProvider>(context);
+    final userProvider = Provider.of<UserProvider>(context);
+    final userId = userProvider.getUser().docId.toString();
+
     return Scaffold(
-      appBar:AppBar(
-        title: Text("All Intelligent Students"),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-      ),
-      body: StreamProvider.value(
-        value: StudentService().getAllIntelligentStudents(userProvider.getUser().docId.toString()),
-        initialData: [StudentModel()],
-        builder: (context, child){
+      appBar: AppBar(title: const Text("Intelligent Students")),
+      body: StreamProvider<List<StudentModel>>.value(
+        value: StudentService().getAllIntelligentStudents(userId),
+        initialData: const [],
+        builder: (context, child) {
           List<StudentModel> studentList = context.watch<List<StudentModel>>();
+
+          if (studentList.isEmpty) {
+            return const Center(
+              child: Text(
+                "No bookmarked students.",
+                style: TextStyle(color: Colors.grey, fontSize: 16),
+              ),
+            );
+          }
+
           return ListView.builder(
+            padding: const EdgeInsets.all(16),
             itemCount: studentList.length,
-            itemBuilder: (BuildContext context, int index) {
-              return ListTile(
-                leading: Icon(Icons.task),
-                title: Text(studentList[index].studentName.toString()),
-                subtitle: Text(studentList[index].studentAge.toString()),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(onPressed: ()async{
-                      if(studentList[index].intelligent!.contains(userProvider.getUser().docId.toString())){
+            itemBuilder: (context, index) {
+              final student = studentList[index];
+              final isBookmarked = student.intelligent?.contains(userId) ?? false;
+
+              return Card(
+                elevation: 1,
+                margin: const EdgeInsets.only(bottom: 10),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.amber.withOpacity(0.15),
+                    child: Icon(Icons.star, color: Colors.amber[800]),
+                  ),
+                  title: Text(student.studentName ?? "Unnamed", style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text("Age: ${student.studentAge ?? 'N/A'} • City: ${student.studentCity ?? 'N/A'}"),
+                  trailing: IconButton(
+                    icon: Icon(
+                      isBookmarked ? Icons.star_rounded : Icons.star_outline_rounded,
+                      color: isBookmarked ? Colors.amber[700] : Colors.grey,
+                    ),
+                    onPressed: () async {
+                      if (isBookmarked) {
                         await StudentService().removeFromIntelligentList(
-                            userID: userProvider.getUser().docId.toString(),
-                            studentId: studentList[index].docId.toString());
-                      }
-                      else{
+                          userID: userId,
+                          studentId: student.docId.toString(),
+                        );
+                      } else {
                         await StudentService().addToIntelligentList(
-                            userID: userProvider.getUser().docId.toString(),
-                            studentId: studentList[index].docId.toString());
+                          userID: userId,
+                          studentId: student.docId.toString(),
+                        );
                       }
-                    }, icon: Icon(studentList[index].intelligent!.contains(userProvider.getUser().docId.toString()) ? Icons.bookmark_sharp : Icons.bookmark_outline_sharp)),
-
-
-                    // Checkbox(
-                    //     value: cityList[index].visited,
-                    //     onChanged: (val)async{
-                    //       try{
-                    //         await CityService().markAsVisitedCities(
-                    //             cityList[index].docId.toString(),
-                    //             val!);
-                    //       }catch(e){
-                    //         ScaffoldMessenger.of(context)
-                    //             .showSnackBar(SnackBar(content: Text(e.toString())));
-                    //       }
-                    //
-                    //     }),
-                    // IconButton(onPressed: ()async{
-                    //   try{
-                    //     await CityService().deleteCity(
-                    //         cityList[index].docId.toString()
-                    //     ).then((value){
-                    //       showDialog(context: context, builder: (BuildContext context) {
-                    //         return
-                    //           AlertDialog(
-                    //             title: Text("Success"),
-                    //             content: Text("City Deleted Successfully"),
-                    //             actions: [
-                    //               TextButton(onPressed: (){
-                    //                 Navigator.pop(context);
-                    //               }, child: Text("OK"))
-                    //             ],
-                    //           );
-                    //       });
-                    //     });
-                    //   }catch(e){
-                    //     ScaffoldMessenger.of(context)
-                    //         .showSnackBar(SnackBar(content: Text(e.toString())));
-                    //   }
-                    // }, icon: Icon(Icons.delete, color: Colors.red,)),
-                    // IconButton(onPressed: (){
-                    //   Navigator.push(context, MaterialPageRoute(builder: (context)=> UpdateCity(model: cityList[index])));
-                    // }, icon: Icon(Icons.edit, color: Colors.blue,)),
-                  ],
+                    },
+                  ),
                 ),
               );
-            },);
+            },
+          );
         },
       ),
     );
