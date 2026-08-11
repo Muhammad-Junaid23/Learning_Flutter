@@ -11,102 +11,137 @@ class UpdateStudent extends StatefulWidget {
 }
 
 class _UpdateStudentState extends State<UpdateStudent> {
-  TextEditingController nameController = TextEditingController();
-  TextEditingController ageController = TextEditingController();
-  TextEditingController cityController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController nameController;
+  late TextEditingController ageController;
+  late TextEditingController cityController;
   bool isLoading = false;
+
   @override
   void initState() {
     super.initState();
-    nameController = TextEditingController(
-        text: widget.model.studentName.toString()
-    );
-    ageController = TextEditingController(
-        text: widget.model.studentAge.toString()
-    );
-    cityController = TextEditingController(
-        text: widget.model.studentCity.toString()
-    );
+    nameController = TextEditingController(text: widget.model.studentName ?? "");
+    ageController = TextEditingController(text: widget.model.studentAge?.toString() ?? "");
+    cityController = TextEditingController(text: widget.model.studentCity ?? "");
   }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    ageController.dispose();
+    cityController.dispose();
+    super.dispose();
+  }
+
+  void _handleUpdate() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => isLoading = true);
+
+    try {
+      await StudentService().updateStudent(
+        StudentModel(
+          docId: widget.model.docId.toString(),
+          studentName: nameController.text.trim(),
+          studentAge: int.parse(ageController.text.trim()),
+          studentCity: cityController.text.trim(),
+        ),
+      );
+
+      if (!mounted) return;
+      setState(() => isLoading = false);
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text("Success"),
+          content: const Text("Student details updated successfully"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: const Text("OK"),
+            )
+          ],
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Update City"),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-      ),
-      body: Column(
-        children: [
-          TextField(
-            controller: nameController,
-            decoration: InputDecoration(
-              hintText: "Student Name",
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+      appBar: AppBar(title: const Text("Update Student")),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: nameController,
+                validator: (val) => val == null || val.isEmpty ? "Name is required" : null,
+                decoration: InputDecoration(
+                  labelText: "Student Name",
+                  prefixIcon: const Icon(Icons.person_outline),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
               ),
-            ),
-          ),
-          SizedBox(height: 10,),
-          TextField(
-            controller: ageController,
-            decoration: InputDecoration(
-              hintText: "Student Age",
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: ageController,
+                keyboardType: TextInputType.number,
+                validator: (val) => val == null || int.tryParse(val) == null ? "Enter a valid age" : null,
+                decoration: InputDecoration(
+                  labelText: "Student Age",
+                  prefixIcon: const Icon(Icons.numbers_outlined),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
               ),
-            ),
-          ),
-          SizedBox(height: 10,),
-          TextField(
-            controller: cityController,
-            decoration: InputDecoration(
-              hintText: "Student City",
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: cityController,
+                validator: (val) => val == null || val.isEmpty ? "City is required" : null,
+                decoration: InputDecoration(
+                  labelText: "Student City",
+                  prefixIcon: const Icon(Icons.location_city_outlined),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
               ),
-            ),
-          ),
-          SizedBox(height: 10,),
-          isLoading ? Center(
-            child: CircularProgressIndicator(),
-          ):
-          ElevatedButton(onPressed: ()async{
-            try{
-              isLoading = true;
-              setState(() {});
-              await StudentService().updateStudent(
-                  StudentModel(
-                    docId: widget.model.docId.toString(),
-                    studentName: nameController.text.toString(),
-                    studentAge: int.parse(ageController.text),
-                    studentCity: cityController.text.toString(),
+              const SizedBox(height: 28),
+              SizedBox(
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: isLoading ? null : _handleUpdate,
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: isLoading
+                      ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2.5),
                   )
-              ).then((val){
-                setState(() {
-                  isLoading = false;
-                });
-                showDialog(context: context, builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text("Success"),
-                    content: Text("Student Updated Successfully"),
-                    actions: [
-                      TextButton(onPressed: (){
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                      }, child: Text("OK"))
-                    ],
-                  );
-                }, );
-              });
-            }catch(e){
-              isLoading = false;
-              setState(() {});
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text(e.toString())));
-            }
-          }, child: Text("Update Student"))
-        ],
+                      : const Text("Update Student", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              )
+            ],
+          ),
+        ),
       ),
     );
   }
