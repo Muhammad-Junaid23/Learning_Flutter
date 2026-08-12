@@ -1,0 +1,120 @@
+import 'dart:convert';
+
+// ==================== SINGLE TASK RESPONSE ====================
+TaskModel taskModelFromJson(String str) => TaskModel.fromJson(json.decode(str));
+String taskModelToJson(TaskModel data) => json.encode(data.toJson());
+
+class TaskModel {
+  final Task? task;
+  final String? message;
+  final bool? status;
+
+  TaskModel({
+    this.task,
+    this.message,
+    this.status,
+  });
+
+  factory TaskModel.fromJson(Map<String, dynamic> json) => TaskModel(
+    task: json["task"] == null ? null : Task.fromJson(json["task"]),
+    message: json["message"],
+    status: json["status"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "task": task?.toJson(),
+    "message": message,
+    "status": status,
+  };
+}
+
+// ==================== TASK LISTING RESPONSE ====================
+TaskListingModel taskListingModelFromJson(String str) =>
+    TaskListingModel.fromJson(json.decode(str));
+String taskListingModelToJson(TaskListingModel data) =>
+    json.encode(data.toJson());
+
+class TaskListingModel {
+  final List<Task>? tasks;
+  final int? totalPages;
+  final int? currentPage;
+  final int? count;
+  final String? message;
+  final bool? status;
+
+  TaskListingModel({
+    this.tasks,
+    this.totalPages,
+    this.currentPage,
+    this.count,
+    this.message,
+    this.status,
+  });
+
+  factory TaskListingModel.fromJson(Map<String, dynamic> json) =>
+      TaskListingModel(
+        tasks: json["tasks"] == null
+            ? []
+            : List<Task>.from(json["tasks"]!.map((x) => Task.fromJson(x))),
+        totalPages: json["totalPages"],
+        currentPage: json["currentPage"],
+        count: json["count"],
+        message: json["message"],
+        status: json["status"],
+      );
+
+  Map<String, dynamic> toJson() => {
+    "tasks":
+    tasks == null ? [] : List<dynamic>.from(tasks!.map((x) => x.toJson())),
+    "totalPages": totalPages,
+    "currentPage": currentPage,
+    "count": count,
+    "message": message,
+    "status": status,
+  };
+}
+
+// ==================== SHARED TASK ENTITY ====================
+class Task {
+  final String? id;
+  final String? description;
+  final bool? complete;
+  final String? owner;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final int? v;
+
+  Task({
+    this.id,
+    this.description,
+    this.complete,
+    this.owner,
+    this.createdAt,
+    this.updatedAt,
+    this.v,
+  });
+
+  factory Task.fromJson(Map<String, dynamic> json) => Task(
+    id: json["_id"],
+    description: json["description"],
+    complete: json["complete"],
+    owner: json["owner"],
+    createdAt: json["createdAt"] == null
+        ? null
+        : DateTime.parse(json["createdAt"]),
+    updatedAt: json["updatedAt"] == null
+        ? null
+        : DateTime.parse(json["updatedAt"]),
+    v: json["__v"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "_id": id,
+    "description": description,
+    "complete": complete,
+    "owner": owner,
+    "createdAt": createdAt?.toIso8601String(),
+    "updatedAt": updatedAt?.toIso8601String(),
+    "__v": v,
+  };
+}
