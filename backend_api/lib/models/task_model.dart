@@ -94,6 +94,27 @@ class Task {
     this.v,
   });
 
+  /// Creates a copy of this Task with updated values
+  Task copyWith({
+    String? id,
+    String? description,
+    bool? complete,
+    String? owner,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    int? v,
+  }) {
+    return Task(
+      id: id ?? this.id,
+      description: description ?? this.description,
+      complete: complete ?? this.complete,
+      owner: owner ?? this.owner,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      v: v ?? this.v,
+    );
+  }
+
   factory Task.fromJson(Map<String, dynamic> json) => Task(
     id: json["_id"],
     description: json["description"],
@@ -117,4 +138,5 @@ class Task {
     "updatedAt": updatedAt?.toIso8601String(),
     "__v": v,
   };
+
 }

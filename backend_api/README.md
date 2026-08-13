@@ -1,5 +1,11 @@
 # backend_api
 
+Flutter API CORS issue:
+
+flutter run -d chrome --web-browser-flag "--disable-web-security"
+
+
+
 Backend API in Flutter project.
 
 ## Getting Started

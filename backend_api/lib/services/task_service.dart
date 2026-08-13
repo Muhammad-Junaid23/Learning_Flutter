@@ -76,7 +76,6 @@ class TaskService {
     required String token,
     required String taskId,
     required String description,
-    required bool complete,
   }) async {
     try {
       http.Response response = await http.patch(
@@ -87,7 +86,6 @@ class TaskService {
         },
         body: jsonEncode({
           "description": description,
-          "complete": complete,
         }),
       );
 
@@ -204,4 +202,61 @@ class TaskService {
       throw Exception(e.toString());
     }
   }
+
+
+  ///Mark Task as Completed
+  Future<bool> markTaskAsCompleted({
+    required String token,
+    required String taskId,
+  }) async {
+    try {
+      final response = await http.patch(
+        Uri.parse('$baseURL/todos/complete/$taskId'),
+        headers: {
+          'Authorization': token,
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "complete": true,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw response.body; // show backend error
+      }
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
+
+///Mark Task as Completed
+Future<bool> markTaskAsIncompleted({
+required String token,
+required String taskId,
+}) async {
+  try {
+    final response = await http.patch(
+      Uri.parse('$baseURL/todos/complete/$taskId'),
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "complete": false,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      throw response.body; // show backend error
+    }
+  } catch (e) {
+    throw e.toString();
+  }
+}
+
 }
