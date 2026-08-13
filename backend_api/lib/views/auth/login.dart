@@ -4,6 +4,7 @@ import 'package:backend_api/provider/user_provider.dart';
 import 'package:backend_api/services/auth_service.dart';
 import 'package:backend_api/services/user_service.dart';
 import 'package:backend_api/views/auth/register.dart';
+import 'package:backend_api/views/task/get_all_task.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -62,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             content: Text(val.message!),
                             actions: [
                               TextButton(onPressed: (){
-                                Navigator.pop(context);
+                                Navigator.push(context,MaterialPageRoute(builder: (context)=>GetAllTask()));
                               }, child: Text("OK"))
                             ],
                           );
