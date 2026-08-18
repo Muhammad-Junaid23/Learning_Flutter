@@ -1,7 +1,7 @@
+import 'package:backend_api/provider/task_provider.dart';
 import 'package:backend_api/provider/token_provider.dart';
 import 'package:backend_api/provider/user_provider.dart';
 import 'package:backend_api/views/auth/login.dart';
-import 'package:backend_api/views/auth/register.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -10,6 +10,7 @@ void main() {
      MultiProvider(providers:[
        ChangeNotifierProvider(create: (context)=>TokenProvider()),
        ChangeNotifierProvider(create: (context)=>UserProvider()),
+       ChangeNotifierProvider(create: (_) => TaskProvider()),
      ],
          child: const MyApp()
      )

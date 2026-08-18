@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:backend_api/models/task_model.dart';
+import 'package:backend_api/provider/task_provider.dart';
 import 'package:backend_api/provider/token_provider.dart';
-import 'package:backend_api/services/task_service.dart';
 
 class FilterTask extends StatefulWidget {
   const FilterTask({super.key});
@@ -14,9 +13,8 @@ class FilterTask extends StatefulWidget {
 class _FilterTaskState extends State<FilterTask> {
   DateTime? _startDate;
   DateTime? _endDate;
-  Future<TaskListingModel>? _filterFuture;
 
-  Future<void> _selectDate(BuildContext context, bool isStartDate) async {
+  Future<void> _pickDate(BuildContext context, bool isStart) async {
     final picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -26,41 +24,37 @@ class _FilterTaskState extends State<FilterTask> {
 
     if (picked != null) {
       setState(() {
-        if (isStartDate) {
-          _startDate = picked;
-        } else {
-          _endDate = picked;
-        }
+        if (isStart) _startDate = picked;
+        else _endDate = picked;
       });
     }
   }
 
-  void _applyFilter() {
+  void _applyFilter(String token) {
     if (_startDate == null || _endDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select both Start and End dates")),
+        const SnackBar(content: Text("Please select both dates")),
       );
       return;
     }
 
-    final token = Provider.of<TokenProvider>(context, listen: false).getToken().toString();
     final startStr = _startDate!.toIso8601String().split('T')[0];
     final endStr = _endDate!.toIso8601String().split('T')[0];
 
-    setState(() {
-      _filterFuture = TaskService().filterTask(
-        token: token,
-        startDate: startStr,
-        endDate: endStr,
-      );
-    });
+    Provider.of<TaskProvider>(context, listen: false).filterTasksByDate(
+      token: token,
+      startDate: startStr,
+      endDate: endStr,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final token = Provider.of<TokenProvider>(context).getToken().toString();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Filter Tasks by Date"),
+        title: const Text("Filter Tasks"),
         backgroundColor: Colors.indigo,
         foregroundColor: Colors.white,
       ),
@@ -72,30 +66,22 @@ class _FilterTaskState extends State<FilterTask> {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => _selectDate(context, true),
+                    onPressed: () => _pickDate(context, true),
                     icon: const Icon(Icons.calendar_today),
-                    label: Text(
-                      _startDate == null
-                          ? "Start Date"
-                          : _startDate!.toIso8601String().split('T')[0],
-                    ),
+                    label: Text(_startDate == null ? "Start Date" : _startDate!.toIso8601String().split('T')[0]),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => _selectDate(context, false),
+                    onPressed: () => _pickDate(context, false),
                     icon: const Icon(Icons.calendar_today),
-                    label: Text(
-                      _endDate == null
-                          ? "End Date"
-                          : _endDate!.toIso8601String().split('T')[0],
-                    ),
+                    label: Text(_endDate == null ? "End Date" : _endDate!.toIso8601String().split('T')[0]),
                   ),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: _applyFilter,
+                  onPressed: () => _applyFilter(token),
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo),
                   child: const Text("Filter", style: TextStyle(color: Colors.white)),
                 ),
@@ -103,29 +89,20 @@ class _FilterTaskState extends State<FilterTask> {
             ),
           ),
           Expanded(
-            child: _filterFuture == null
-                ? const Center(child: Text("Select date range and tap Filter"))
-                : FutureBuilder<TaskListingModel>(
-              future: _filterFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+            child: Consumer<TaskProvider>(
+              builder: (context, taskProvider, child) {
+                if (taskProvider.isLoading) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                if (snapshot.hasError) {
-                  return Center(child: Text("Error: ${snapshot.error}"));
-                }
-
-                final tasks = snapshot.data?.tasks;
-
-                if (tasks == null || tasks.isEmpty) {
-                  return const Center(child: Text("No tasks found in date range"));
+                if (taskProvider.filteredResults.isEmpty) {
+                  return const Center(child: Text("No tasks in selected range"));
                 }
 
                 return ListView.builder(
-                  itemCount: tasks.length,
+                  itemCount: taskProvider.filteredResults.length,
                   itemBuilder: (context, index) {
-                    final task = tasks[index];
+                    final task = taskProvider.filteredResults[index];
                     return ListTile(
                       leading: const Icon(Icons.task),
                       title: Text(task.description ?? "No description"),
