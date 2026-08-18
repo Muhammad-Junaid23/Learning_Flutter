@@ -2,8 +2,10 @@ import 'package:backend_api/models/task_model.dart';
 import 'package:backend_api/provider/token_provider.dart';
 import 'package:backend_api/services/task_service.dart';
 import 'package:backend_api/views/task/create_task.dart';
+import 'package:backend_api/views/task/filter_task.dart';
 import 'package:backend_api/views/task/get_completed_task.dart';
 import 'package:backend_api/views/task/get_incompleted_task.dart';
+import 'package:backend_api/views/task/search_task.dart';
 import 'package:backend_api/views/task/update_task.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -45,6 +47,27 @@ class _GetAllTaskState extends State<GetAllTask> {
         backgroundColor: Colors.deepOrange,
         foregroundColor: Colors.white,
         actions: [
+
+          // --- SEARCH TASKS ---
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SearchTask()),
+              );
+            },
+            icon: const Icon(Icons.search),
+          ),
+          // --- FILTER TASKS BY DATE ---
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FilterTask()),
+              );
+            },
+            icon: const Icon(Icons.filter_alt),
+          ),
           IconButton(
             onPressed: () {
               Navigator.push(
