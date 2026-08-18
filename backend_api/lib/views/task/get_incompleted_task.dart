@@ -1,134 +1,65 @@
-import 'package:backend_api/models/task_model.dart';
-import 'package:backend_api/provider/token_provider.dart';
-import 'package:backend_api/services/task_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:backend_api/provider/task_provider.dart';
+import 'package:backend_api/provider/token_provider.dart';
 
-class GetInCompletedTask extends StatefulWidget {
+class GetInCompletedTask extends StatelessWidget {
   const GetInCompletedTask({super.key});
 
   @override
-  State<GetInCompletedTask> createState() => _GetInCompletedTaskState();
-}
-
-class _GetInCompletedTaskState extends State<GetInCompletedTask> {
-  late Future<TaskListingModel> _tasksFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchTasks();
-  }
-
-  void _fetchTasks() {
-    final token = Provider.of<TokenProvider>(context, listen: false).getToken().toString();
-    setState(() {
-      _tasksFuture = TaskService().getIncompletedTasks(token: token);
-    });
-  }
-
-  Future<void> _refreshTask() async {
-    _fetchTasks();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final tokenProvider = Provider.of<TokenProvider>(context);
+    final token = Provider.of<TokenProvider>(context).getToken().toString();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Get Incompleted Task"),
+        title: const Text("Incompleted Tasks"),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
-      body: RefreshIndicator(
-        onRefresh: _refreshTask,
-        child: FutureBuilder<TaskListingModel>(
-          future: _tasksFuture,
-          builder: (context, snapshot) {
-            // 1. Loading state
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+      body: Consumer<TaskProvider>(
+        builder: (context, taskProvider, child) {
+          final incompletedTasks = taskProvider.incompletedTasks;
 
-            // 2. Error state
-            if (snapshot.hasError) {
-              return Center(child: Text("Error: ${snapshot.error}"));
-            }
-
-            // 3. Null and empty check (Fixes Red Screen)
-            final taskListingModel = snapshot.data;
-            final tasks = taskListingModel?.tasks;
-
-            if (tasks == null || tasks.isEmpty) {
-              return ListView(
+          if (incompletedTasks.isEmpty) {
+            return RefreshIndicator(
+              onRefresh: () => taskProvider.fetchAllTasks(token),
+              child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: const [
                   SizedBox(height: 100),
                   Center(child: Text("No incompleted tasks found")),
                 ],
-              );
-            }
+              ),
+            );
+          }
 
-            // 4. Render list
-            return ListView.builder(
-              itemCount: tasks.length,
-              itemBuilder: (BuildContext context, int index) {
-                final task = tasks[index];
+          return RefreshIndicator(
+            onRefresh: () => taskProvider.fetchAllTasks(token),
+            child: ListView.builder(
+              itemCount: incompletedTasks.length,
+              itemBuilder: (context, index) {
+                final task = incompletedTasks[index];
 
                 return ListTile(
-                  leading: const Icon(Icons.task),
+                  leading: const Icon(Icons.radio_button_unchecked, color: Colors.orange),
                   title: Text(task.description ?? "No description"),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Checkbox(
-                        value: task.complete ?? false,
-                        onChanged: (bool? value) async {
-                          if (value == null) return;
-
-                          // Remove task locally from incompleted list if marked completed
-                          final toggledTask = tasks[index];
-                          setState(() {
-                            tasks.removeAt(index);
-                          });
-
-                          try {
-                            final token = tokenProvider.getToken().toString();
-                            final taskId = task.id.toString();
-
-                            if (value) {
-                              await TaskService().markTaskAsCompleted(
-                                token: token,
-                                taskId: taskId,
-                              );
-                            } else {
-                              await TaskService().markTaskAsIncompleted(
-                                token: token,
-                                taskId: taskId,
-                              );
-                            }
-                          } catch (e) {
-                            // Revert on network failure
-                            setState(() {
-                              tasks.insert(index, toggledTask);
-                            });
-
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(e.toString())),
-                              );
-                            }
-                          }
-                        },
-                      ),
-                    ],
+                  trailing: Checkbox(
+                    value: task.complete ?? false,
+                    onChanged: (bool? val) {
+                      if (val != null) {
+                        taskProvider.toggleTaskStatus(
+                          token: token,
+                          task: task,
+                          isCompleted: val,
+                        );
+                      }
+                    },
                   ),
                 );
               },
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:backend_api/models/task_model.dart';
 import 'package:backend_api/provider/token_provider.dart';
+import 'package:backend_api/provider/task_provider.dart';
 import 'package:backend_api/services/task_service.dart';
 import 'package:backend_api/views/task/create_task.dart';
 import 'package:backend_api/views/task/filter_task.dart';
@@ -18,121 +19,93 @@ class GetAllTask extends StatefulWidget {
 }
 
 class _GetAllTaskState extends State<GetAllTask> {
-  late Future<TaskListingModel> _tasksFuture;
-
   @override
   void initState() {
     super.initState();
-    _fetchTasks();
-  }
-
-  void _fetchTasks() {
-    final token = Provider.of<TokenProvider>(context, listen: false).getToken().toString();
-    setState(() {
-      _tasksFuture = TaskService().getAllTasks(token: token);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final token = Provider.of<TokenProvider>(context, listen: false).getToken();
+      if (token != null) {
+        Provider.of<TaskProvider>(context, listen: false).fetchAllTasks(token);
+      }
     });
-  }
-
-  Future<void> _refreshTask() async {
-    _fetchTasks();
   }
 
   @override
   Widget build(BuildContext context) {
-    final tokenProvider = Provider.of<TokenProvider>(context);
+    final token = Provider.of<TokenProvider>(context).getToken().toString();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Get All Task"),
+        title: const Text("All Tasks"),
         backgroundColor: Colors.deepOrange,
         foregroundColor: Colors.white,
         actions: [
-
-          // --- SEARCH TASKS ---
           IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SearchTask()),
-              );
-            },
             icon: const Icon(Icons.search),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SearchTask()),
+            ),
           ),
-          // --- FILTER TASKS BY DATE ---
           IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const FilterTask()),
-              );
-            },
             icon: const Icon(Icons.filter_alt),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const FilterTask()),
+            ),
           ),
           IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const GetCompletedTask()),
-              );
-            },
             icon: const Icon(Icons.circle),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const GetCompletedTask()),
+            ),
           ),
           IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const GetInCompletedTask()),
-              );
-            },
             icon: const Icon(Icons.incomplete_circle),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const GetInCompletedTask()),
+            ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          // Await navigation so when user returns after creating a task, it auto-refreshes
-          await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CreateTask()),
-          );
-          _fetchTasks();
-        },
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const CreateTask()),
+        ),
         child: const Icon(Icons.add),
       ),
-      body: RefreshIndicator(
-        onRefresh: _refreshTask,
-        child: FutureBuilder<TaskListingModel>(
-          future: _tasksFuture,
-          builder: (context, snapshot) {
-            // 1. Handle Loading State
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+      body: Consumer<TaskProvider>(
+        builder: (context, taskProvider, child) {
+          if (taskProvider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            // 2. Handle Error State
-            if (snapshot.hasError) {
-              return Center(child: Text("Error loading tasks: ${snapshot.error}"));
-            }
+          if (taskProvider.errorMessage != null) {
+            return Center(child: Text("Error: ${taskProvider.errorMessage}"));
+          }
 
-            // 3. Handle Null Data Safely (Fixes Red Screen)
-            final taskListingModel = snapshot.data;
-            final tasks = taskListingModel?.tasks;
-
-            if (tasks == null || tasks.isEmpty) {
-              return ListView(
+          if (taskProvider.tasks.isEmpty) {
+            return RefreshIndicator(
+              onRefresh: () => taskProvider.fetchAllTasks(token),
+              child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: const [
                   SizedBox(height: 100),
                   Center(child: Text("No tasks found")),
                 ],
-              );
-            }
+              ),
+            );
+          }
 
-            // 4. Render Tasks List
-            return ListView.builder(
-              itemCount: tasks.length,
-              itemBuilder: (BuildContext context, int index) {
-                final task = tasks[index];
+          return RefreshIndicator(
+            onRefresh: () => taskProvider.fetchAllTasks(token),
+            child: ListView.builder(
+              itemCount: taskProvider.tasks.length,
+              itemBuilder: (context, index) {
+                final task = taskProvider.tasks[index];
 
                 return ListTile(
                   leading: const Icon(Icons.task),
@@ -140,98 +113,44 @@ class _GetAllTaskState extends State<GetAllTask> {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // --- TOGGLE CHECKBOX ---
+                      // Toggle Checkbox
                       Checkbox(
                         value: task.complete ?? false,
-                        onChanged: (bool? value) async {
-                          if (value == null) return;
-
-                          // Optimistically update UI state immediately
-                          setState(() {
-                            tasks[index] = task.copyWith(complete: value);
-                          });
-
-                          try {
-                            final token = tokenProvider.getToken().toString();
-                            final taskId = task.id.toString();
-
-                            if (value) {
-                              await TaskService().markTaskAsCompleted(
-                                token: token,
-                                taskId: taskId,
-                              );
-                            } else {
-                              await TaskService().markTaskAsIncompleted(
-                                token: token,
-                                taskId: taskId,
-                              );
-                            }
-                          } catch (e) {
-                            // Revert back on failure
-                            setState(() {
-                              tasks[index] = task.copyWith(complete: !value);
-                            });
-
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(e.toString())),
-                              );
-                            }
-                          }
-                        },
-                      ),
-
-                      // --- DELETE TASK ---
-                      IconButton(
-                        onPressed: () async {
-                          final deletedTask = tasks[index];
-
-                          // Remove locally immediately for smooth UI UX
-                          setState(() {
-                            tasks.removeAt(index);
-                          });
-
-                          try {
-                            await TaskService().deleteTask(
-                              token: tokenProvider.getToken().toString(),
-                              taskId: deletedTask.id.toString(),
+                        onChanged: (bool? val) {
+                          if (val != null) {
+                            taskProvider.toggleTaskStatus(
+                              token: token,
+                              task: task,
+                              isCompleted: val,
                             );
-                          } catch (e) {
-                            // Reinsert on failure
-                            setState(() {
-                              tasks.insert(index, deletedTask);
-                            });
-
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(e.toString())),
-                              );
-                            }
                           }
                         },
-                        icon: const Icon(Icons.delete),
                       ),
-
-                      // --- UPDATE TASK ---
+                      // Delete Action
                       IconButton(
-                        onPressed: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => UpdateTask(model: task),
-                            ),
-                          );
-                          _fetchTasks(); // Refresh list after returning from update screen
-                        },
+                        icon: const Icon(Icons.delete),
+                        onPressed: () => taskProvider.deleteTask(
+                          token: token,
+                          taskId: task.id.toString(),
+                        ),
+                      ),
+                      // Edit Action
+                      IconButton(
                         icon: const Icon(Icons.edit),
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => UpdateTask(model: task),
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 );
               },
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

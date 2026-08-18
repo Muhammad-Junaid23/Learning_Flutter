@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:backend_api/models/task_model.dart';
+import 'package:backend_api/provider/task_provider.dart';
 import 'package:backend_api/provider/token_provider.dart';
-import 'package:backend_api/services/task_service.dart';
 
 class SearchTask extends StatefulWidget {
   const SearchTask({super.key});
@@ -13,17 +12,13 @@ class SearchTask extends StatefulWidget {
 
 class _SearchTaskState extends State<SearchTask> {
   final TextEditingController _searchController = TextEditingController();
-  Future<TaskListingModel>? _searchFuture;
 
-  void _performSearch() {
-    final keyword = _searchController.text.trim();
-    if (keyword.isEmpty) return;
-
-    final token = Provider.of<TokenProvider>(context, listen: false).getToken().toString();
-
-    setState(() {
-      _searchFuture = TaskService().searchTask(token: token, keyword: keyword);
-    });
+  void _onSearch(String token) {
+    final query = _searchController.text.trim();
+    if (query.isNotEmpty) {
+      Provider.of<TaskProvider>(context, listen: false)
+          .searchTasks(token: token, keyword: query);
+    }
   }
 
   @override
@@ -34,6 +29,8 @@ class _SearchTaskState extends State<SearchTask> {
 
   @override
   Widget build(BuildContext context) {
+    final token = Provider.of<TokenProvider>(context).getToken().toString();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Search Tasks"),
@@ -47,48 +44,35 @@ class _SearchTaskState extends State<SearchTask> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: "Enter keyword...",
+                hintText: "Search keyword...",
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.arrow_forward),
-                  onPressed: _performSearch,
+                  onPressed: () => _onSearch(token),
                 ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
-              onSubmitted: (_) => _performSearch(),
+              onSubmitted: (_) => _onSearch(token),
             ),
           ),
           Expanded(
-            child: _searchFuture == null
-                ? const Center(child: Text("Type a keyword to start searching"))
-                : FutureBuilder<TaskListingModel>(
-              future: _searchFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+            child: Consumer<TaskProvider>(
+              builder: (context, taskProvider, child) {
+                if (taskProvider.isLoading) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                if (snapshot.hasError) {
-                  return Center(child: Text("Error: ${snapshot.error}"));
-                }
-
-                final tasks = snapshot.data?.tasks;
-
-                if (tasks == null || tasks.isEmpty) {
-                  return const Center(child: Text("No tasks match your search"));
+                if (taskProvider.searchResults.isEmpty) {
+                  return const Center(child: Text("No tasks found matching query"));
                 }
 
                 return ListView.builder(
-                  itemCount: tasks.length,
+                  itemCount: taskProvider.searchResults.length,
                   itemBuilder: (context, index) {
-                    final task = tasks[index];
+                    final task = taskProvider.searchResults[index];
                     return ListTile(
                       leading: Icon(
-                        task.complete == true
-                            ? Icons.check_circle
-                            : Icons.radio_button_unchecked,
+                        task.complete == true ? Icons.check_circle : Icons.radio_button_unchecked,
                         color: task.complete == true ? Colors.green : Colors.grey,
                       ),
                       title: Text(task.description ?? "No description"),
