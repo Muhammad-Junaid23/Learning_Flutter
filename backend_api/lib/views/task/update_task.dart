@@ -35,7 +35,7 @@ class _UpdateTaskState extends State<UpdateTask> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Update Task"),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.deepOrange,
         foregroundColor: Colors.white,
       ),
       body: Padding(

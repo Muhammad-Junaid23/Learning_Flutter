@@ -27,7 +27,7 @@ class _CreateTaskState extends State<CreateTask> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Create Task"),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.deepOrange,
         foregroundColor: Colors.white,
       ),
       body: Padding(
