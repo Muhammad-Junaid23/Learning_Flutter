@@ -12,6 +12,9 @@ class TaskProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
+  String? _activeKeyword;
+  DateTimeRange? _activeFilterRange;
+
   // Getters
   List<Task> get tasks => _tasks;
   List<Task> get completedTasks => _tasks.where((t) => t.complete == true).toList();
@@ -20,6 +23,53 @@ class TaskProvider extends ChangeNotifier {
   List<Task> get filteredResults => _filteredResults;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+
+  // Getter that determines what the UI should display
+  List<Task> get displayedTasks {
+    List<Task> temp = _tasks;
+
+    // Apply Keyword Filter if active
+    if (_activeKeyword != null && _activeKeyword!.isNotEmpty) {
+      temp = temp.where((t) =>
+          (t.description ?? '').toLowerCase().contains(_activeKeyword!.toLowerCase())
+      ).toList();
+    }
+
+    // Apply Date Range Filter if active
+    if (_activeFilterRange != null) {
+      temp = temp.where((t) {
+        if (t.createdAt == null) return false;
+        final created = t.createdAt!;
+
+        return created.isAfter(_activeFilterRange!.start.subtract(const Duration(days: 1))) &&
+            created.isBefore(_activeFilterRange!.end.add(const Duration(days: 1)));
+      }).toList();
+    }
+
+    return temp;
+  }
+
+  bool get isFilteredOrSearched =>
+      (_activeKeyword != null && _activeKeyword!.isNotEmpty) || _activeFilterRange != null;
+
+  // Search Action
+  void searchInMemory(String keyword) {
+    _activeKeyword = keyword;
+    notifyListeners();
+  }
+
+  // Filter Action
+  void filterByDateRange(DateTime start, DateTime end) {
+    _activeFilterRange = DateTimeRange(start: start, end: end);
+    notifyListeners();
+  }
+
+  // Reset Action back to normal state
+  void resetFilters() {
+    _activeKeyword = null;
+    _activeFilterRange = null;
+    notifyListeners();
+  }
 
   // Set loading helper
   void _setLoading(bool loading) {

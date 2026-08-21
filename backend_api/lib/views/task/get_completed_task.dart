@@ -13,7 +13,7 @@ class GetCompletedTask extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Completed Tasks"),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.deepOrange,
         foregroundColor: Colors.white,
       ),
       body: Consumer<TaskProvider>(
