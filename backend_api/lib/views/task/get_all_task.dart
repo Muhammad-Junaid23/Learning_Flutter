@@ -2,6 +2,7 @@ import 'package:backend_api/models/task_model.dart';
 import 'package:backend_api/provider/token_provider.dart';
 import 'package:backend_api/provider/task_provider.dart';
 import 'package:backend_api/services/task_service.dart';
+import 'package:backend_api/views/profile/get_profile.dart';
 import 'package:backend_api/views/task/create_task.dart';
 import 'package:backend_api/views/task/filter_task.dart';
 import 'package:backend_api/views/task/get_completed_task.dart';
@@ -134,6 +135,18 @@ class _GetAllTaskState extends State<GetAllTask> {
               context,
               MaterialPageRoute(builder: (_) => const GetInCompletedTask()),
             ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.person),
+            tooltip: 'Profile',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const GetProfileScreen(),
+                ),
+              );
+            },
           ),
         ],
       ),
