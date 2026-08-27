@@ -4,7 +4,10 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   cloud_firestore
+<<<<<<< HEAD
   firebase_auth
+=======
+>>>>>>> fb45ec0 (task product category model done)
   firebase_core
 )
 
