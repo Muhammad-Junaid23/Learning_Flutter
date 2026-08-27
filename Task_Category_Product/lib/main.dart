@@ -3,15 +3,22 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
+
+import 'firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:task_category_product/firebase_options.dart';
 import 'package:task_category_product/views/home.dart';
 
-void main() async async{
+void main() async async async{
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   WidgetsFlutterBinding.ensureInitialized();
 
