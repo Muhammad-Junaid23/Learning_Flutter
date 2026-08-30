@@ -3,6 +3,10 @@ import 'package:task_category_product/models/category_model.dart';
 import 'package:task_category_product/models/product_model.dart';
 import 'package:task_category_product/services/category_service.dart';
 import 'package:task_category_product/services/product_service.dart';
+import 'package:task_category_product/views/banner/create_banner.dart';
+import 'package:task_category_product/models/banner_model.dart';
+import 'package:task_category_product/services/banner_service.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final ProductServices productServices = ProductServices();
   final CategoryServices categoryServices = CategoryServices();
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,11 +30,21 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           ElevatedButton.icon(
             onPressed: () {
-              // TODO: Navigate to Create Product
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CreateBanner()),
+              );
             },
             icon: const Icon(Icons.add),
-            label: const Text("Add Product"),
+            label: const Text("Add Banner"),
           ),
+          // ElevatedButton.icon(
+          //   onPressed: () {
+          //     // TODO: Navigate to Create Product
+          //   },
+          //   icon: const Icon(Icons.add),
+          //   label: const Text("Add Product"),
+          // ),
           const SizedBox(width: 15),
         ],
       ),
@@ -41,20 +56,207 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // =========================
-              // CAROUSEL
+              // BANNER CAROUSEL
               // =========================
 
-              SizedBox(
-                height: 230,
-                width: double.infinity,
-                child: PageView(
-                  children: [
-                    _carouselItem("Product Image 1"),
-                    _carouselItem("Product Image 2"),
-                    _carouselItem("Product Image 3"),
-                    _carouselItem("Product Image 4"),
-                  ],
-                ),
+              StreamBuilder<List<BannerModel>>(
+                stream: BannerServices().getAllBanners(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox(
+                      height: 230,
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+
+                  if (snapshot.hasError) {
+                    return SizedBox(
+                      height: 230,
+                      child: Center(child: Text("Error: ${snapshot.error}")),
+                    );
+                  }
+
+                  final banners = snapshot.data ?? [];
+
+                  if (banners.isEmpty) {
+                    return Container(
+                      height: 230,
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text("No banners available"),
+                    );
+                  }
+
+                  return Column(
+                    children: [
+                      // ==================================
+                      // CAROUSEL
+                      // ==================================
+
+                      CarouselSlider.builder(
+                        itemCount: banners.length,
+
+                        itemBuilder:
+                            (
+                              BuildContext context,
+                              int itemIndex,
+                              int pageViewIndex,
+                            ) {
+                              final banner = banners[itemIndex];
+
+                              return Container(
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                clipBehavior: Clip.antiAlias,
+                                child: Stack(
+                                  children: [
+                                    // IMAGE
+                                    Positioned.fill(
+                                      child: Image.network(
+                                        banner.image ?? "",
+                                        fit: BoxFit.cover,
+
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                              return const Center(
+                                                child: Icon(
+                                                  Icons.image_not_supported,
+                                                  size: 50,
+                                                ),
+                                              );
+                                            },
+                                      ),
+                                    ),
+
+                                    // GRADIENT
+                                    Positioned.fill(
+                                      child: Container(
+                                        decoration: const BoxDecoration(
+                                          gradient: LinearGradient(
+                                            begin: Alignment.centerLeft,
+                                            end: Alignment.centerRight,
+                                            colors: [
+                                              Colors.black87,
+                                              Colors.transparent,
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+
+                                    // TEXT
+                                    Positioned(
+                                      left: 25,
+                                      top: 0,
+                                      bottom: 0,
+                                      child: Center(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              banner.title ?? "",
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 26,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+
+                                            const SizedBox(height: 8),
+
+                                            SizedBox(
+                                              width: 250,
+                                              child: Text(
+                                                banner.description ?? "",
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                            ),
+
+                                            const SizedBox(height: 15),
+
+                                            ElevatedButton(
+                                              onPressed: () {},
+                                              child: const Text("Shop Now →"),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+
+                        options: CarouselOptions(
+                          height: 230,
+
+                          viewportFraction: 1.0,
+
+                          // AUTOMATIC SLIDING
+                          autoPlay: true,
+
+                          autoPlayInterval: const Duration(seconds: 3),
+
+                          autoPlayAnimationDuration: const Duration(
+                            milliseconds: 800,
+                          ),
+
+                          autoPlayCurve: Curves.easeInOut,
+
+                          // LOOP
+                          enableInfiniteScroll: true,
+
+                          // IMPORTANT
+                          pauseAutoPlayOnTouch: true,
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      // ==================================
+                      // INDICATORS
+                      // ==================================
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+
+                        children: List.generate(banners.length, (index) {
+                          final isSelected = currentBannerIndex == index;
+
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+
+                            height: 8,
+
+                            width: isSelected ? 22 : 8,
+
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Colors.deepPurple
+                                  : Colors.grey,
+
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          );
+                        }),
+                      ),
+                    ],
+                  );
+                },
               ),
 
               const SizedBox(height: 20),
@@ -210,25 +412,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  // =========================================================
-  // CAROUSEL ITEM
-  // =========================================================
-
-  Widget _carouselItem(String text) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.grey.shade200,
-      ),
-      child: Center(
-        child: Text(
-          text,
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
     );
