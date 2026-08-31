@@ -3,8 +3,9 @@ import 'package:task_category_product/models/banner_model.dart';
 import 'package:task_category_product/services/banner_service.dart';
 
 class CreateBanner extends StatefulWidget {
-  const CreateBanner({super.key});
+  final BannerModel? banner;
 
+  const CreateBanner({super.key, this.banner});
   @override
   State<CreateBanner> createState() => _CreateBannerState();
 }
@@ -17,6 +18,19 @@ class _CreateBannerState extends State<CreateBanner> {
   final BannerServices bannerServices = BannerServices();
 
   bool isLoading = false;
+
+  bool get isEditing => widget.banner != null;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.banner != null) {
+      titleController.text = widget.banner!.title ?? "";
+      descriptionController.text = widget.banner!.description ?? "";
+      imageController.text = widget.banner!.image ?? "";
+    }
+  }
 
   Future<void> createBanner() async {
     if (titleController.text.trim().isEmpty ||
@@ -63,6 +77,53 @@ class _CreateBannerState extends State<CreateBanner> {
     }
   }
 
+  Future<void> updateBanner() async {
+    if (titleController.text.trim().isEmpty ||
+        imageController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Title and image URL are required")),
+      );
+
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final banner = BannerModel(
+        docId: widget.banner!.docId,
+        title: titleController.text.trim(),
+        description: descriptionController.text.trim(),
+        image: imageController.text.trim(),
+        createdAt: widget.banner!.createdAt,
+      );
+
+      await bannerServices.updateBanner(banner);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Banner updated successfully")),
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   void dispose() {
     titleController.dispose();
@@ -74,7 +135,9 @@ class _CreateBannerState extends State<CreateBanner> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Create Banner")),
+      appBar: AppBar(
+        title: Text(isEditing ? "Update Banner" : "Create Banner"),
+      ),
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -138,11 +201,15 @@ class _CreateBannerState extends State<CreateBanner> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: isLoading ? null : createBanner,
+                onPressed: isLoading
+                    ? null
+                    : isEditing
+                    ? updateBanner
+                    : createBanner,
                 child: isLoading
                     ? const CircularProgressIndicator()
-                    : const Text(
-                        "Create Banner",
+                    : Text(
+                        isEditing ? "Update Banner" : "Create Banner",
                         style: TextStyle(fontSize: 16),
                       ),
               ),
