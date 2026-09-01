@@ -5,7 +5,9 @@ import 'package:task_category_product/services/category_service.dart';
 import 'package:task_category_product/services/product_service.dart';
 
 class CreateProduct extends StatefulWidget {
-  const CreateProduct({super.key});
+  final ProductModel? product;
+
+  const CreateProduct({super.key, this.product});
 
   @override
   State<CreateProduct> createState() => _CreateProductState();
@@ -22,6 +24,22 @@ class _CreateProductState extends State<CreateProduct> {
 
   String? selectedCategoryId;
   bool isLoading = false;
+
+  bool get isEditing => widget.product != null;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.product != null) {
+      productNameController.text = widget.product!.productName ?? "";
+      priceController.text = widget.product!.price?.toString() ?? "";
+      descriptionController.text = widget.product!.description ?? "";
+      imageController.text = widget.product!.image ?? "";
+
+      selectedCategoryId = widget.product!.categoryId;
+    }
+  }
 
   Future<void> createProduct() async {
     if (productNameController.text.trim().isEmpty ||
@@ -86,6 +104,70 @@ class _CreateProductState extends State<CreateProduct> {
     }
   }
 
+  Future<void> updateProduct() async {
+    if (productNameController.text.trim().isEmpty ||
+        priceController.text.trim().isEmpty ||
+        selectedCategoryId == null ||
+        imageController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Product name, price, category and image URL are required",
+          ),
+        ),
+      );
+      return;
+    }
+
+    final double? price = double.tryParse(priceController.text.trim());
+
+    if (price == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a valid price")),
+      );
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final product = ProductModel(
+        docId: widget.product!.docId,
+        categoryId: selectedCategoryId,
+        productName: productNameController.text.trim(),
+        price: price,
+        description: descriptionController.text.trim(),
+        image: imageController.text.trim(),
+        saved: widget.product!.saved,
+        createdAt: widget.product!.createdAt,
+      );
+
+      await productServices.updateProduct(product);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Product updated successfully")),
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   void dispose() {
     productNameController.dispose();
@@ -98,7 +180,9 @@ class _CreateProductState extends State<CreateProduct> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Create Product")),
+      appBar: AppBar(
+        title: Text(isEditing ? "Update Product" : "Create Product"),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -230,12 +314,16 @@ class _CreateProductState extends State<CreateProduct> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: isLoading ? null : createProduct,
+                onPressed: isLoading
+                    ? null
+                    : isEditing
+                    ? updateProduct
+                    : createProduct,
                 child: isLoading
                     ? const CircularProgressIndicator()
-                    : const Text(
-                        "Create Product",
-                        style: TextStyle(fontSize: 16),
+                    : Text(
+                        isEditing ? "Update Product" : "Create Product",
+                        style: const TextStyle(fontSize: 16),
                       ),
               ),
             ),
