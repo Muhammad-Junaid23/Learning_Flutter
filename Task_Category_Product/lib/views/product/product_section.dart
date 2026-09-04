@@ -5,6 +5,7 @@ import 'package:task_category_product/models/product_model.dart';
 
 import 'package:task_category_product/services/category_service.dart';
 import 'package:task_category_product/services/product_service.dart';
+import 'package:task_category_product/views/product/create_product.dart';
 
 import 'package:task_category_product/views/product/manage_products.dart';
 import 'package:task_category_product/views/product/product_details.dart';
@@ -321,42 +322,47 @@ class ProductGrid extends StatelessWidget {
 
                   const SizedBox(height: 8),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // SAVE
-                      IconButton(
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        tooltip: "Save",
-                        onPressed: () {
-                          // Save functionality later
-                        },
-                        icon: const Icon(Icons.star_border, size: 20),
-                      ),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 40,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            tooltip: "Save",
+                            onPressed: () {},
+                            icon: const Icon(Icons.star_border, size: 20),
+                          ),
 
-                      // EDIT
-                      IconButton(
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        tooltip: "Edit",
-                        onPressed: () {
-                          // Your existing edit code
-                        },
-                        icon: const Icon(Icons.edit, size: 20),
-                      ),
+                          IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            tooltip: "Edit",
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      CreateProduct(product: product),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.edit, size: 20),
+                          ),
 
-                      // DELETE
-                      IconButton(
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        tooltip: "Delete",
-                        onPressed: () {
-                          // Your existing delete code
-                        },
-                        icon: const Icon(Icons.delete, size: 20),
+                          IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            tooltip: "Delete",
+                            onPressed: () {},
+                            icon: const Icon(Icons.delete, size: 20),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),
