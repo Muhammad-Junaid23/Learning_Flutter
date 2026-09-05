@@ -283,18 +283,54 @@ class ProductGrid extends StatelessWidget {
           children: [
             // IMAGE
             Expanded(
-              child: product.image != null && product.image!.isNotEmpty
-                  ? Image.network(
-                      product.image!,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Center(
-                          child: Icon(Icons.image_not_supported, size: 50),
-                        );
-                      },
-                    )
-                  : const Center(child: Icon(Icons.image, size: 50)),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: product.image != null && product.image!.isNotEmpty
+                        ? Image.network(
+                            product.image!,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Center(
+                                child: Icon(
+                                  Icons.image_not_supported,
+                                  size: 50,
+                                ),
+                              );
+                            },
+                          )
+                        : const Center(child: Icon(Icons.image, size: 50)),
+                  ),
+                  // SAVE / STAR BUTTON
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(blurRadius: 4, color: Colors.black26),
+                        ],
+                      ),
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 38,
+                          minHeight: 38,
+                        ),
+                        tooltip: "Save",
+                        onPressed: () {
+                          // Save functionality later
+                          // after Firebase Authentication.
+                        },
+                        icon: const Icon(Icons.star_border, size: 22),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
 
             // PRODUCT INFORMATION
@@ -321,49 +357,6 @@ class ProductGrid extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 8),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 40,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          IconButton(
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            tooltip: "Save",
-                            onPressed: () {},
-                            icon: const Icon(Icons.star_border, size: 20),
-                          ),
-
-                          IconButton(
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            tooltip: "Edit",
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      CreateProduct(product: product),
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.edit, size: 20),
-                          ),
-
-                          IconButton(
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            tooltip: "Delete",
-                            onPressed: () {},
-                            icon: const Icon(Icons.delete, size: 20),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
